@@ -45,12 +45,14 @@ function RootStack() {
         name="create-group"
         options={{
           title: 'Criar grupo',
+          headerShown: false 
         }}
       />
       <Stack.Screen
         name="$group"
         options={{
           title: 'Detalhes do grupo',
+          headerShown: false 
         }}
       />
     </Stack>
@@ -64,7 +66,7 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}> 
           <RootStack />
           <StatusBar style="auto" />
         </ThemeProvider>

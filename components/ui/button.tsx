@@ -6,6 +6,7 @@ import {
   Text,
   TouchableOpacity,
   ViewStyle,
+  useColorScheme,
 } from 'react-native';
 
 type ButtonVariant = 'primary' | 'outline';
@@ -32,15 +33,31 @@ export function Button({
   destructive,
   style,
 }: ButtonProps) {
+  const scheme = useColorScheme();
+  const isDark = scheme === 'dark';
+
   const isDisabled = disabled || loading;
+
+  const outlineColor = isDark ? '#ffffff' : '#737373';
+
   const backgroundColor =
     variant === 'outline'
-      ? '#ffffff'
+      ? 'transparent'
       : destructive
       ? DESTRUCTIVE_COLOR
       : PRIMARY_COLOR;
 
-  const textColor = variant === 'outline' ? backgroundColor : '#ffffff';
+  const borderColor =
+    variant === 'outline'
+      ? outlineColor
+      : destructive
+      ? DESTRUCTIVE_COLOR
+      : PRIMARY_COLOR;
+
+  const textColor =
+    variant === 'outline'
+      ? outlineColor
+      : '#ffffff';
 
   return (
     <TouchableOpacity
@@ -50,8 +67,8 @@ export function Button({
       style={[
         styles.base,
         {
-          backgroundColor: variant === 'outline' ? '#ffffff' : backgroundColor,
-          borderColor: destructive ? DESTRUCTIVE_COLOR : PRIMARY_COLOR,
+          backgroundColor,
+          borderColor,
           opacity: isDisabled ? 0.7 : 1,
         },
         style,
@@ -60,7 +77,9 @@ export function Button({
       {loading ? (
         <ActivityIndicator color={textColor} />
       ) : (
-        <Text style={[styles.text, { color: textColor }]}>{title}</Text>
+        <Text style={[styles.text, { color: textColor }]}>
+          {title}
+        </Text>
       )}
     </TouchableOpacity>
   );
@@ -69,24 +88,14 @@ export function Button({
 const styles = StyleSheet.create({
   base: {
     height: 52,
-    borderRadius: 12, // ~0.75rem
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1.5,
-    shadowColor: '#5DC264',
-    shadowOpacity: 0.25,
-    shadowRadius: 12,
-    shadowOffset: {
-      width: 0,
-      height: 6,
-    },
+    borderWidth: 1,
     elevation: 4,
   },
   text: {
     fontSize: 16,
     fontWeight: '600',
-    // Caso DM Sans seja carregada depois, podemos ajustar aqui.
-    // fontFamily: 'DMSans',
   },
 });
-
