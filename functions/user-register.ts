@@ -1,4 +1,5 @@
 import { BACKEND_URL } from '@/constants/config';
+import { safeGetErrorMessage } from './adapter/get-error';
 
 export type RegisterPayload = {
   name: string;
@@ -27,13 +28,3 @@ export async function registerUser(payload: RegisterPayload): Promise<AuthRespon
 
   return response.json() as Promise<AuthResponse>;
 }
-
-async function safeGetErrorMessage(response: Response) {
-  try {
-    const data = (await response.json()) as { message?: string; error?: string };
-    return data.message ?? data.error;
-  } catch {
-    return undefined;
-  }
-}
-

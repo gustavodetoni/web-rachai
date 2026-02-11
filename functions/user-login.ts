@@ -1,4 +1,5 @@
 import { BACKEND_URL } from '@/constants/config';
+import { safeGetErrorMessage } from './adapter/get-error';
 
 export type LoginPayload = {
   email: string;
@@ -25,13 +26,3 @@ export async function loginUser(payload: LoginPayload): Promise<AuthResponse> {
 
   return response.json() as Promise<AuthResponse>;
 }
-
-async function safeGetErrorMessage(response: Response) {
-  try {
-    const data = (await response.json()) as { message?: string; error?: string };
-    return data.message ?? data.error;
-  } catch {
-    return undefined;
-  }
-}
-

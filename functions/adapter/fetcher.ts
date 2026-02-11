@@ -1,4 +1,5 @@
 import { BACKEND_URL, JWT_NAME } from '@/constants/config'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import type { HttpAdapter } from './http'
 
 export class FetcherAdapter implements HttpAdapter {
@@ -87,12 +88,9 @@ export class FetcherAdapter implements HttpAdapter {
   }
 
   async setHeaders() {
-    const cookieStore = document.cookie.split('; ')
-    const token = cookieStore
-      .find((c) => c.startsWith(`${JWT_NAME}=`))
-      ?.split('=')[1]
+    const token = await AsyncStorage.getItem(JWT_NAME)
 
-    if (token) {
+    if (token && token.trim().length > 0) {
       this.headers = {
         'Content-Type': 'application/json',
         Accept: 'application/json',
