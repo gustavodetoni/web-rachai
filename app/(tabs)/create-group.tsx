@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: 18,
     paddingTop: 90,
     paddingBottom: 60,
     justifyContent: 'space-between',
@@ -152,8 +152,7 @@ const styles = StyleSheet.create({
   },
   form: {
     flex: 1,
-    marginTop: 16,
-    gap: 16,
+    gap: 12,
   },
   fieldSpacing: {
     height: 8,

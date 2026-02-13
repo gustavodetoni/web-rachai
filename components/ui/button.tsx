@@ -38,7 +38,7 @@ export function Button({
 
   const isDisabled = disabled || loading;
 
-  const outlineColor = isDark ? '#ffffff' : '#737373';
+  const outlineColor = isDark ? '#737373' : '#737373';
 
   const backgroundColor =
     variant === 'outline'

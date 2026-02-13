@@ -19,7 +19,11 @@ export function GroupCard({ group }: GroupCardProps) {
 
   return (
     <Pressable onPress={handlePress} style={styles.pressable}>
-      <ThemedView style={styles.card}>
+      <ThemedView
+        lightColor="#ffffff" // Explicit white for light theme card
+        darkColor="#1E2021" // Slightly lighter than background for dark theme card
+        style={styles.card}
+      >
         <View style={styles.thumbnailWrapper}>
           <Image
             source={
@@ -59,11 +63,13 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     gap: 16,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
+    borderWidth: 1, // Added border
+    borderColor: 'rgba(128, 128, 128, 0.2)', // Subtle border color for both themes
+    shadowColor: '#000', // Adjusted for better cross-theme visibility
+    shadowOpacity: 0.08,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
   },
   thumbnailWrapper: {
     width: 54,
@@ -87,4 +93,3 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
 });
-

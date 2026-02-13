@@ -7,32 +7,43 @@ import {
   View,
 } from 'react-native';
 
+import { useThemeColor } from '@/hooks/use-theme-color';
+import { Colors } from '@/constants/theme';
+
 type InputProps = TextInputProps & {
   label?: string;
   error?: string;
 };
 
-const BORDER_COLOR = '#E5E7EB';
-const FOCUSED_COLOR = '#5DC264';
-
 export function Input({ label, error, secureTextEntry, ...rest }: InputProps) {
   const [isFocused, setIsFocused] = useState(false);
-
+  
+  const focusedBorderColor = '#5DC264';
+  const inputBgColor = useThemeColor({ light: '#ffffff', dark: Colors.dark.background }, 'background');
+  const borderColor = useThemeColor({ light: '#E5E7EB', dark: '#374151' }, 'background');
+  const textColor = useThemeColor({ light: Colors.light.text, dark: Colors.dark.text }, 'text');
+  const placeholderColor = useThemeColor({ light: '#9CA3AF', dark: '#6B7280' }, 'text');
+  const shadowColor = useThemeColor({ light: '#5DC264', dark: '#000' }, 'background');
+  
   return (
     <View style={styles.container}>
-      {label ? <Text style={styles.label}>{label}</Text> : null}
+      {label ? (
+        <Text style={[styles.label, { color: textColor }]}>{label}</Text>
+      ) : null}
       <View
         style={[
           styles.inputWrapper,
           {
-            borderColor: isFocused ? FOCUSED_COLOR : BORDER_COLOR,
-            shadowOpacity: isFocused ? 0.18 : 0,
+            borderColor: borderColor,
+            backgroundColor: inputBgColor,
+            shadowColor: shadowColor,
+            shadowOpacity: isFocused ? 0.18 : 0, // Still apply shadow on focus
           },
         ]}
       >
         <TextInput
-          style={styles.input}
-          placeholderTextColor="#9CA3AF"
+          style={[styles.input, { color: textColor }]}
+          placeholderTextColor={placeholderColor}
           secureTextEntry={secureTextEntry}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
@@ -52,21 +63,18 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#111827',
+    bottom: 4
   },
   inputWrapper: {
     borderWidth: 1.5,
-    borderRadius: 12, // ~0.75rem
+    borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    backgroundColor: '#ffffff',
-    shadowColor: '#5DC264',
     shadowOffset: { width: 0, height: 6 },
     shadowRadius: 12,
   },
   input: {
     fontSize: 16,
-    color: '#111827',
   },
   error: {
     fontSize: 12,

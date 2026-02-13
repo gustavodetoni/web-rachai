@@ -37,24 +37,7 @@ function RootStack() {
   }
 
   return (
-    <Stack>
-      <Stack.Screen name="login" options={{ headerShown: false }} />
-      <Stack.Screen name="register" options={{ headerShown: false }} />
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen
-        name="create-group"
-        options={{
-          title: 'Criar grupo',
-          headerShown: false 
-        }}
-      />
-      <Stack.Screen
-        name="$group"
-        options={{
-          title: 'Detalhes do grupo',
-          headerShown: false 
-        }}
-      />
+    <Stack screenOptions={{ headerShown: false}}>
     </Stack>
   );
 }

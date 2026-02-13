@@ -1,11 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
-import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
-import { Pressable, StyleSheet, View } from 'react-native'
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'; // Import useSafeAreaInsets
 
 import { GroupCard } from '@/components/group-card'
 import { HelloWave } from '@/components/hello-wave'
-import ParallaxScrollView from '@/components/parallax-scroll-view'
 import { ThemedText } from '@/components/themed-text'
 import { ThemedView } from '@/components/themed-view'
 import { IconSymbol } from '@/components/ui/icon-symbol'
@@ -14,6 +13,7 @@ import { getUser } from '@/functions/user-get'
 
 export default function HomeScreen() {
   const router = useRouter()
+  const insets = useSafeAreaInsets() // Get safe area insets
 
   const { data: user } = useQuery({
     queryKey: ['user'],
@@ -35,16 +35,14 @@ export default function HomeScreen() {
 
   return (
     <ThemedView style={styles.screen}>
-      <ParallaxScrollView
-        headerBackgroundColor={{ dark: '#ffffff', light: '#ffffff' }}
-        headerImage={
-          <Image
-            source={require('@/assets/images/group-image.png')}
-            style={styles.reactLogo}
-          />
-        }
+      <ScrollView
+        contentContainerStyle={[
+          styles.scrollContainer,
+          { paddingTop: insets.top + 24 },
+        ]}
+        pointerEvents="box-none"
       >
-        <ThemedView style={styles.titleContainer}>
+        <ThemedView style={styles.header}>
           <ThemedText type="title">
             {user ? `Bem-vindo, ${user.name.split(' ')[0]}!` : 'Bem-vindo!'}
           </ThemedText>
@@ -67,6 +65,7 @@ export default function HomeScreen() {
             </ThemedText>
           ) : !groups || groups.length === 0 ? (
             <ThemedView style={styles.emptyState}>
+              <IconSymbol name="plus" size={48} color="gray" />
               <ThemedText type="subtitle">
                 Nenhum grupo por aqui ainda
               </ThemedText>
@@ -79,9 +78,13 @@ export default function HomeScreen() {
             groups.map((group) => <GroupCard key={group.id} group={group} />)
           )}
         </View>
-      </ParallaxScrollView>
+      </ScrollView>
 
-      <Pressable style={styles.fab} onPress={handleCreateGroup}>
+      <Pressable
+        style={[styles.fab, { bottom: insets.bottom + 10 }]}
+        onPress={handleCreateGroup}
+        pointerEvents="auto"
+      >
         <IconSymbol name="plus" size={28} color="#ffffff" />
       </Pressable>
     </ThemedView>
@@ -92,50 +95,55 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
   },
-  titleContainer: {
+  scrollContainer: {
+    paddingHorizontal: 18,
+  },
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
   },
   sectionHeader: {
-    gap: 2,
+    marginTop: 16,
+    marginBottom: 8,
   },
   sectionSubtitle: {
-    opacity: 0.75,
+    opacity: 0.7,
+    fontSize: 14,
   },
   groupsContainer: {
-    marginTop: 10,
+    marginTop: 16,
     gap: 12,
   },
   emptyState: {
-    paddingVertical: 24,
-    gap: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 48,
+    gap: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(128, 128, 128, 0.2)', // Subtle border for empty state
   },
   emptyStateText: {
-    opacity: 0.8,
-  },
-  reactLogo: {
-    height: 350,
-    width: 350,
-    top: 0,
-    left: 100,
-    position: 'absolute',
+    opacity: 0.7,
+    textAlign: 'center',
+    maxWidth: '80%',
+    lineHeight: 20,
   },
   fab: {
     position: 'absolute',
     right: 24,
-    bottom: 32,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     backgroundColor: '#5DC264',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#5DC264',
-    shadowOpacity: 0.35,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 10 },
-    elevation: 10,
-    zIndex: 999,        // 👈 importante
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 12,
+    zIndex: 999,
   },
 })

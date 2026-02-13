@@ -1,4 +1,4 @@
-import { JWT_NAME } from '@/constants/config';
+import { JWT_NAME, JWT_EXPIRES_AT_NAME } from '@/constants/config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {
   createContext,
@@ -8,9 +8,11 @@ import React, {
   useState,
   type ReactNode,
 } from 'react';
+import { jwtDecode } from 'jwt-decode';
 
 type AuthContextValue = {
   accessToken: string | null;
+  expiresAt: number | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   signIn: (token: string) => Promise<void>;
@@ -21,21 +23,28 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [expiresAt, setExpiresAt] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadToken = async () => {
       try {
         const storedToken = await AsyncStorage.getItem(JWT_NAME);
-        if (storedToken && storedToken.trim().length > 0) {
-          setAccessToken(storedToken);
-        } else {
-          setAccessToken(null);
-          await AsyncStorage.removeItem(JWT_NAME);
+        const storedExpiresAt = await AsyncStorage.getItem(JWT_EXPIRES_AT_NAME);
+
+        if (storedToken && storedExpiresAt) {
+          const parsedExpiresAt = parseInt(storedExpiresAt, 10);
+          if (new Date().getTime() < parsedExpiresAt) {
+            setAccessToken(storedToken);
+            setExpiresAt(parsedExpiresAt);
+          } else {
+            console.warn('Token expirado ou inválido, realizando signOut.');
+            await signOut();
+          }
         }
       } catch (error) {
         console.error('Erro ao carregar token:', error);
-        setAccessToken(null);
+        await signOut();
       } finally {
         setIsLoading(false);
       }
@@ -45,19 +54,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signIn = useCallback(async (token: string) => {
-    setAccessToken(token);
-    await AsyncStorage.setItem(JWT_NAME, token);
+    try {
+      const decodedToken: { exp: number } = jwtDecode(token);
+      const newExpiresAt = decodedToken.exp * 1000;
+
+      setAccessToken(token);
+      setExpiresAt(newExpiresAt);
+      await AsyncStorage.setItem(JWT_NAME, token);
+      await AsyncStorage.setItem(JWT_EXPIRES_AT_NAME, newExpiresAt.toString());
+    } catch (error) {
+      console.error('Erro ao decodificar token JWT:', error);
+      await signOut();
+    }
   }, []);
 
   const signOut = useCallback(async () => {
     setAccessToken(null);
+    setExpiresAt(null);
     await AsyncStorage.removeItem(JWT_NAME);
+    await AsyncStorage.removeItem(JWT_EXPIRES_AT_NAME);
   }, []);
+
+  useEffect(() => {
+    if (expiresAt) {
+      const timeout = setInterval(() => {
+        if (new Date().getTime() > expiresAt) {
+          console.warn('Token expirado, realizando signOut automático.');
+          void signOut();
+        }
+      }, 60 * 1000);
+
+      return () => clearInterval(timeout);
+    }
+  }, [expiresAt, signOut]);
 
   const value: AuthContextValue = {
     accessToken,
+    expiresAt,
     isLoading,
-    isAuthenticated: !!accessToken,
+    isAuthenticated: !!accessToken && !!expiresAt && new Date().getTime() < expiresAt,
     signIn,
     signOut,
   };
@@ -74,4 +109,3 @@ export function useAuth() {
 
   return ctx;
 }
-
