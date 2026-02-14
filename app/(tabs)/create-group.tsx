@@ -4,25 +4,27 @@ import { useRouter } from 'expo-router';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
   Text,
-  Keyboard,
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import { z } from 'zod';
 
-import { Button } from '@components/ui/button';
-import { Input } from '@components/ui/input';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { createGroup, type CreateGroupPayload } from '@/functions/groups-create';
+import { createGroup } from '@/functions/groups-create';
+import { Button } from '@components/ui/button';
+import { ImagePickerComponent } from '@components/ui/image-picker';
+import { Input } from '@components/ui/input';
 
 const createGroupSchema = z.object({
   name: z.string().min(1, 'Informe um nome para o grupo.'),
   description: z.string().optional(),
+  thumbnail: z.string().optional().nullable(),
 });
 
 type CreateGroupFormValues = z.infer<typeof createGroupSchema>;
@@ -40,11 +42,12 @@ export default function CreateGroupScreen() {
     defaultValues: {
       name: '',
       description: '',
+      thumbnail: null,
     },
   });
 
   const mutation = useMutation({
-    mutationFn: (payload: CreateGroupPayload) => createGroup(payload),
+    mutationFn: (payload: FormData) => createGroup(payload),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['groups'] });
       router.back();
@@ -52,7 +55,27 @@ export default function CreateGroupScreen() {
   });
 
   const onSubmit = (values: CreateGroupFormValues) => {
-    mutation.mutate(values);
+    const formData = new FormData();
+    formData.append('name', values.name);
+    
+    if (values.description) {
+      formData.append('description', values.description);
+    }
+
+    if (values.thumbnail) {
+      const uri = values.thumbnail;
+      const fileName = uri.split('/').pop() || 'thumbnail.jpg';
+      const match = /\.(\w+)$/.exec(fileName);
+      const type = match ? `image/${match[1]}` : 'image/jpeg';
+
+      formData.append('thumbnail', {
+        uri,
+        name: fileName,
+        type,
+      } as any);
+    }
+
+    mutation.mutate(formData);
   };
 
   return (
@@ -70,6 +93,20 @@ export default function CreateGroupScreen() {
           </View>
 
           <View style={styles.form}>
+            <Controller
+              control={control}
+              name="thumbnail"
+              render={({ field: { value, onChange }, fieldState: { error } }) => (
+                <ImagePickerComponent
+                  value={value}
+                  onChange={onChange}
+                  error={error?.message}
+                />
+              )}
+            />
+
+            <View style={styles.fieldSpacing} />
+
             <Controller
               control={control}
               name="name"
