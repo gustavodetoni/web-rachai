@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useFocusEffect, useGlobalSearchParams } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -13,12 +13,9 @@ import { getExpenseSummary } from '@/functions/expense-summary-get';
 import { getGroups } from '@/functions/groups-get';
 import { getTransactions } from '@/functions/transaction-get';
 
-type GroupRouteParams = {
-  groupId: string;
-};
-
 export default function GroupScreen() {
-  const { groupId } = useLocalSearchParams<GroupRouteParams>();
+  const params = useGlobalSearchParams();
+  const groupId = Array.isArray(params.groupId) ? params.groupId[0] : params.groupId;
   const insets = useSafeAreaInsets();
   const [selectedTransactionId, setSelectedTransactionId] = useState<string | null>(null);
 
@@ -27,19 +24,27 @@ export default function GroupScreen() {
     queryFn: getGroups,
   });
 
-  const { data: summary, isLoading: isLoadingSummary } = useQuery({
+  const { data: summary, isLoading: isLoadingSummary, refetch: refetchSummary } = useQuery({
     queryKey: ['expense-summary', groupId],
-    queryFn: () => getExpenseSummary(groupId),
+    queryFn: () => getExpenseSummary(groupId!),
     enabled: !!groupId,
   });
 
-  const { data: transactions, isLoading: isLoadingTransactions } = useQuery({
+  const { data: transactions, isLoading: isLoadingTransactions, refetch: refetchTransactions } = useQuery({
     queryKey: ['transactions', groupId],
-    queryFn: () => getTransactions(groupId),
+    queryFn: () => getTransactions(groupId!),
     enabled: !!groupId,
   });
+
+  useFocusEffect(
+    useCallback(() => {
+      refetchSummary();
+      refetchTransactions();
+    }, [refetchSummary, refetchTransactions])
+  );
 
   const group = groups?.find((g) => g.id === groupId);
+
 
   const handleTransactionPress = (id: string) => {
     setSelectedTransactionId(id);
