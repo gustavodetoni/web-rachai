@@ -56,7 +56,7 @@ export default function RegisterScreen() {
     mutationFn: (payload: RegisterPayload) => registerUser(payload),
     onSuccess: async (data) => {
       await signIn(data.accessToken);
-      router.replace('/(tabs)');
+      router.replace('/group');
     },
   });
 
@@ -66,7 +66,7 @@ export default function RegisterScreen() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.replace('/(tabs)');
+      router.replace('/group');
     }
   }, [isAuthenticated, router]);
 
@@ -90,7 +90,7 @@ export default function RegisterScreen() {
             entering={FadeInUp.duration(400).delay(150)}
             style={styles.header}
           >
-            <ThemedText style={styles.title} type="title">Criar Conta</ThemedText> {/* Use ThemedText */}
+            <ThemedText style={styles.title} type="title">Criar Conta</ThemedText> 
           </Animated.View>
 
           <Animated.View
@@ -181,7 +181,7 @@ export default function RegisterScreen() {
             >
             <View style={styles.linkRow}>
               <ThemedText style={styles.linkText}>Já tem conta? </ThemedText> {/* Use ThemedText */}
-              <Link href="/login">
+              <Link href="/(auth)/login">
                 <ThemedText style={styles.linkHighlight}>Login</ThemedText> {/* Use ThemedText */}
               </Link>
             </View>

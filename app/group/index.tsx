@@ -13,7 +13,7 @@ import { getUser } from '@/functions/user-get'
 
 export default function HomeScreen() {
   const router = useRouter()
-  const insets = useSafeAreaInsets() // Get safe area insets
+  const insets = useSafeAreaInsets()
 
   const { data: user } = useQuery({
     queryKey: ['user'],
@@ -30,7 +30,7 @@ export default function HomeScreen() {
   })
 
   const handleCreateGroup = () => {
-    router.push('/create-group')
+    router.push('/group/create-group')
   }
 
   return (
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     gap: 16,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(128, 128, 128, 0.2)', // Subtle border for empty state
+    borderColor: 'rgba(128, 128, 128, 0.2)',
   },
   emptyStateText: {
     opacity: 0.7,

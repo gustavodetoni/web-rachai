@@ -17,14 +17,12 @@ function RootStack() {
   useEffect(() => {
     if (isLoading) return;
 
-    const inAuthGroup = segments[0] === '(tabs)';
+    const inAuthGroup = segments[0] === 'group';
 
     if (!isAuthenticated && inAuthGroup) {
-      // Usuário não autenticado tentando acessar área protegida
-      router.replace('/login');
+      router.replace('/(auth)/login');
     } else if (isAuthenticated && !inAuthGroup) {
-      // Usuário autenticado mas não está nas tabs
-      router.replace('/(tabs)');
+      router.replace('/group');
     }
   }, [isAuthenticated, isLoading, segments, router]);
 

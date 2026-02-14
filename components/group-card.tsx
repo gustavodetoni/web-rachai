@@ -14,14 +14,17 @@ export function GroupCard({ group }: GroupCardProps) {
   const router = useRouter();
 
   const handlePress = () => {
-    router.push(`/$group?group=${group.id}`);
+    router.push({
+      pathname: '/group/[groupId]',
+      params: { groupId: group.id },
+    });
   };
 
   return (
     <Pressable onPress={handlePress} style={styles.pressable}>
       <ThemedView
-        lightColor="#ffffff" // Explicit white for light theme card
-        darkColor="#1E2021" // Slightly lighter than background for dark theme card
+        lightColor="#ffffff"
+        darkColor="#1E2021"
         style={styles.card}
       >
         <View style={styles.thumbnailWrapper}>

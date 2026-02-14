@@ -19,8 +19,8 @@ import { Input } from '@components/ui/input';
 import { Logo } from '@components/ui/logo';
 import { useAuth } from '@/contexts/auth-context';
 import { loginUser, type LoginPayload } from '@functions/user-login';
-import { ThemedView } from '@/components/themed-view'; // Import ThemedView
-import { ThemedText } from '@/components/themed-text'; // Import ThemedText
+import { ThemedView } from '@/components/themed-view';
+import { ThemedText } from '@/components/themed-text';
 
 const loginSchema = z.object({
   email: z.email('Informe um e-mail válido.'),
@@ -49,7 +49,7 @@ export default function LoginScreen() {
     mutationFn: (payload: LoginPayload) => loginUser(payload),
     onSuccess: async (data) => {
       await signIn(data.accessToken);
-      router.replace('/(tabs)');
+      router.replace('/group');
     },
   });
 
@@ -59,7 +59,7 @@ export default function LoginScreen() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.replace('/(tabs)');
+      router.replace('/group');
     }
   }, [isAuthenticated, router]);
 
@@ -83,7 +83,7 @@ export default function LoginScreen() {
             entering={FadeInUp.duration(400).delay(150)}
             style={styles.header}
             >
-            <ThemedText style={styles.title} type="title">Acessar Conta</ThemedText> {/* Use ThemedText */}
+            <ThemedText style={styles.title} type="title">Acessar Conta</ThemedText> 
           </Animated.View>
 
           <Animated.View
@@ -126,7 +126,7 @@ export default function LoginScreen() {
               />
 
             {mutation.error ? (
-              <ThemedText style={styles.formError}> {/* Use ThemedText */}
+              <ThemedText style={styles.formError}>
                 {(mutation.error as Error).message}
               </ThemedText>
             ) : null}
@@ -140,9 +140,9 @@ export default function LoginScreen() {
             style={styles.form}
             >
             <View style={styles.linkRow}>
-              <ThemedText style={styles.linkText}>Ainda não tem conta? </ThemedText> {/* Use ThemedText */}
+              <ThemedText style={styles.linkText}>Ainda não tem conta? </ThemedText>
               <Link href={'/register' as Href}>
-                <ThemedText style={styles.linkHighlight}>Cadastrar-se</ThemedText> {/* Use ThemedText */}
+                <ThemedText style={styles.linkHighlight}>Cadastrar-se</ThemedText>
               </Link>
             </View>
             </Animated.View>
@@ -166,7 +166,7 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  keyboardAvoidingView: { // New style for KeyboardAvoidingView
+  keyboardAvoidingView: {
     flex: 1,
   },
   container: {
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
   linkHighlight: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#5DC264', // Keep the highlight color
+    color: '#5DC264',
   },
   buttonWrapper: {
     marginTop: 40,
