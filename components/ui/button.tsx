@@ -7,6 +7,7 @@ import {
   Text,
   TouchableOpacity,
   ViewStyle,
+  StyleProp,
   useColorScheme,
 } from 'react-native';
 
@@ -19,7 +20,7 @@ type ButtonProps = {
   loading?: boolean;
   variant?: ButtonVariant;
   destructive?: boolean;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
 };
 
 export function Button({

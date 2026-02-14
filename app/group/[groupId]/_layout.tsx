@@ -59,16 +59,17 @@ export default function GroupLayout() {
 
 const styles = StyleSheet.create({
   fabContainer: {
-    width: 56,
-    height: 56,
+    // width: 56,
+    // height: 56,
     borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: -30,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 8,
+    padding: 8,
+    // alignItems: 'center',
+    // justifyContent: 'center',
+    // marginTop: -30,
+    // shadowColor: '#000',
+    // shadowOffset: { width: 0, height: 4 },
+    // shadowOpacity: 0.3,
+    // shadowRadius: 4,
+    // elevation: 8,
   },
 });
