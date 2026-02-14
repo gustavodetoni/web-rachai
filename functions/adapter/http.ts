@@ -5,12 +5,12 @@ export type HttpAdapter = {
   ) => Promise<Response>
   post: (
     input: string | URL | Request,
-    body: Record<string, unknown>,
+    body: Record<string, unknown> | FormData,
     init?: RequestInit | undefined,
   ) => Promise<Response>
   put: (
     input: string | URL | Request,
-    body: Record<string, unknown>,
+    body?: Record<string, unknown> | FormData,
     init?: RequestInit | undefined,
   ) => Promise<Response>
   delete: (

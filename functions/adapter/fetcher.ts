@@ -23,35 +23,35 @@ export class FetcherAdapter implements HttpAdapter {
 
   async post(
     input: string | URL | Request,
-    body: Record<string, unknown>,
+    body: Record<string, unknown> | FormData,
     init?: RequestInit | undefined,
   ): Promise<Response> {
     const url = `${this.host}/${input.toString().replace('/', '')}`
-    await this.setHeaders()
+    await this.setHeaders(body instanceof FormData)
 
     return await fetch(url, {
       method: 'POST',
-      headers: body instanceof FormData ? undefined : this.headers,
+      headers: this.headers,
       credentials: 'include',
       ...init,
-      body: JSON.stringify(body),
+      body: body instanceof FormData ? body : JSON.stringify(body),
     })
   }
 
   async put(
     input: string | URL | Request,
-    body?: Record<string, unknown>,
+    body?: Record<string, unknown> | FormData,
     init?: RequestInit | undefined,
   ): Promise<Response> {
     const url = `${this.host}/${input.toString().replace('/', '')}`
-    await this.setHeaders()
+    await this.setHeaders(body instanceof FormData)
 
     return await fetch(url, {
       method: 'PUT',
       headers: this.headers,
       credentials: 'include',
       ...init,
-      body: body ? JSON.stringify(body) : undefined,
+      body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
     })
   }
 
@@ -72,35 +72,35 @@ export class FetcherAdapter implements HttpAdapter {
 
   async path(
     input: string | URL | Request,
-    body: Record<string, unknown>,
+    body: Record<string, unknown> | FormData,
     init?: RequestInit | undefined,
   ): Promise<Response> {
     const url = `${this.host}/${input.toString().replace('/', '')}`
-    await this.setHeaders()
+    await this.setHeaders(body instanceof FormData)
 
     return await fetch(url, {
       method: 'PATCH',
       headers: this.headers,
       credentials: 'include',
       ...init,
-      body: JSON.stringify(body),
+      body: body instanceof FormData ? body : JSON.stringify(body),
     })
   }
 
-  async setHeaders() {
+  async setHeaders(isFormData: boolean = false) {
     const token = await AsyncStorage.getItem(JWT_NAME)
+    const headers: Record<string, string> = {
+      Accept: 'application/json',
+    }
+
+    if (!isFormData) {
+      headers['Content-Type'] = 'application/json'
+    }
 
     if (token && token.trim().length > 0) {
-      this.headers = {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-        Authorization: `Bearer ${token}`,
-      }
-    } else {
-      this.headers = {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      }
+      headers.Authorization = `Bearer ${token}`
     }
+
+    this.headers = headers
   }
 }

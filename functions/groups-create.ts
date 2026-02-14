@@ -25,7 +25,7 @@ export type Group = {
 const fetcher = new FetcherAdapter();
 
 export async function createGroup(
-  payload: CreateGroupPayload,
+  payload: FormData,
 ): Promise<Group> {
   const response = await fetcher.post('/api/groups', payload);
 

@@ -8,7 +8,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
-  Text,
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
@@ -23,6 +22,8 @@ import {
   registerUser,
   type RegisterPayload,
 } from '@functions/user-register';
+import { ThemedView } from '@/components/themed-view'; // Import ThemedView
+import { ThemedText } from '@/components/themed-text'; // Import ThemedText
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Informe seu nome.'),
@@ -70,143 +71,144 @@ export default function RegisterScreen() {
   }, [isAuthenticated, router]);
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={styles.safe}
-    >
-      <View style={styles.container}>
-        <View>          
-        <Animated.View
-          entering={FadeInUp.duration(400).delay(50)}
-          style={styles.logoContainer}
-        >
-          <Logo />
-        </Animated.View>
-
-        <Animated.View
-          entering={FadeInUp.duration(400).delay(150)}
-          style={styles.header}
-        >
-          <Text style={styles.title}>Criar Conta</Text>
-        </Animated.View>
-
-        <Animated.View
-          entering={FadeInUp.duration(400).delay(250)}
-          style={styles.form}
-        >
-          <Controller
-            control={control}
-            name="name"
-            render={({ field: { value, onChange, onBlur }, fieldState: { error } }) => (
-              <Input
-                label="Nome"
-                placeholder="Digite seu nome..."
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                error={error?.message}
-              />
-            )}
-          />
-
-          <View style={styles.fieldSpacing} />
-
-          <Controller
-            control={control}
-            name="email"
-            render={({ field: { value, onChange, onBlur }, fieldState: { error } }) => (
-              <Input
-                label="E-mail"
-                placeholder="Digite seu e-mail..."
-                keyboardType="email-address"
-                autoCapitalize="none"
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                error={error?.message}
-              />
-            )}
-          />
-
-          <View style={styles.fieldSpacing} />
-
-          <Controller
-            control={control}
-            name="password"
-            render={({ field: { value, onChange, onBlur }, fieldState: { error } }) => (
-              <Input
-                label="Senha"
-                placeholder="************"
-                secureTextEntry
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                error={error?.message}
-              />
-            )}
-          />
-
-          <View style={styles.fieldSpacing} />
-
-          <Controller
-            control={control}
-            name="pixKey"
-            render={({ field: { value, onChange, onBlur }, fieldState: { error } }) => (
-              <Input
-                label="Chave Pix"
-                placeholder="124–1241–4124"
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                error={error?.message}
-              />
-            )}
-          />
-
-          {mutation.error ? (
-            <Text style={styles.formError}>
-              {(mutation.error as Error).message}
-            </Text>
-          ) : null}
-          </Animated.View>
-          </View>
-
-          <View>
+    <ThemedView style={{flex: 1}}> 
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={styles.keyboardAvoidingView} 
+      >
+        <View style={styles.container}>
+          <View>          
           <Animated.View
-          entering={FadeInUp.duration(400).delay(250)}
-          style={styles.form}
+            entering={FadeInUp.duration(400).delay(50)}
+            style={styles.logoContainer}
           >
-          <View style={styles.linkRow}>
-            <Text style={styles.linkText}>Já tem conta? </Text>
-            <Link href="/login">
-              <Text style={styles.linkHighlight}>Login</Text>
-            </Link>
-          </View>
+            <Logo />
           </Animated.View>
-       
 
-        <Animated.View
-          entering={FadeInUp.duration(400).delay(350)}
-          style={styles.buttonWrapper}
-        >
-          <Button
-            title="Criar Conta"
-            onPress={handleSubmit(onSubmit)}
-            loading={isSubmitting || mutation.isPending}
-          />
-        </Animated.View>
+          <Animated.View
+            entering={FadeInUp.duration(400).delay(150)}
+            style={styles.header}
+          >
+            <ThemedText style={styles.title} type="title">Criar Conta</ThemedText> {/* Use ThemedText */}
+          </Animated.View>
+
+          <Animated.View
+            entering={FadeInUp.duration(400).delay(250)}
+            style={styles.form}
+          >
+            <Controller
+              control={control}
+              name="name"
+              render={({ field: { value, onChange, onBlur }, fieldState: { error } }) => (
+                <Input
+                  label="Nome"
+                  placeholder="Digite seu nome..."
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={error?.message}
+                />
+              )}
+            />
+
+            <View style={styles.fieldSpacing} />
+
+            <Controller
+              control={control}
+              name="email"
+              render={({ field: { value, onChange, onBlur }, fieldState: { error } }) => (
+                <Input
+                  label="E-mail"
+                  placeholder="Digite seu e-mail..."
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={error?.message}
+                />
+              )}
+            />
+
+            <View style={styles.fieldSpacing} />
+
+            <Controller
+              control={control}
+              name="password"
+              render={({ field: { value, onChange, onBlur }, fieldState: { error } }) => (
+                <Input
+                  label="Senha"
+                  placeholder="************"
+                  secureTextEntry
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={error?.message}
+                />
+              )}
+            />
+
+            <View style={styles.fieldSpacing} />
+
+            <Controller
+              control={control}
+              name="pixKey"
+              render={({ field: { value, onChange, onBlur }, fieldState: { error } }) => (
+                <Input
+                  label="Chave Pix"
+                  placeholder="124–1241–4124"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={error?.message}
+                />
+              )}
+            />
+
+            {mutation.error ? (
+              <ThemedText style={styles.formError}> {/* Use ThemedText */}
+                {(mutation.error as Error).message}
+              </ThemedText>
+            ) : null}
+            </Animated.View>
+            </View>
+
+            <View>
+            <Animated.View
+            entering={FadeInUp.duration(400).delay(250)}
+            style={styles.form}
+            >
+            <View style={styles.linkRow}>
+              <ThemedText style={styles.linkText}>Já tem conta? </ThemedText> {/* Use ThemedText */}
+              <Link href="/login">
+                <ThemedText style={styles.linkHighlight}>Login</ThemedText> {/* Use ThemedText */}
+              </Link>
+            </View>
+            </Animated.View>
+        
+
+          <Animated.View
+            entering={FadeInUp.duration(400).delay(350)}
+            style={styles.buttonWrapper}
+          >
+            <Button
+              title="Criar Conta"
+              onPress={handleSubmit(onSubmit)}
+              loading={isSubmitting || mutation.isPending}
+            />
+          </Animated.View>
+          </View>
         </View>
-      </View>
-    </KeyboardAvoidingView>
-    </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: {
+  keyboardAvoidingView: { // New style for KeyboardAvoidingView
     flex: 1,
-    backgroundColor: '#ffffff',
   },
   container: {
     flex: 1,
@@ -245,7 +247,6 @@ const styles = StyleSheet.create({
   },
   linkText: {
     fontSize: 14,
-    color: '#6B7280',
   },
   linkHighlight: {
     fontSize: 14,
@@ -256,4 +257,3 @@ const styles = StyleSheet.create({
     marginTop: 40,
   },
 });
-
