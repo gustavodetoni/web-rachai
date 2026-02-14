@@ -167,7 +167,7 @@ export default function RegisterScreen() {
             />
 
             {mutation.error ? (
-              <ThemedText style={styles.formError}> {/* Use ThemedText */}
+              <ThemedText style={styles.formError}> 
                 {(mutation.error as Error).message}
               </ThemedText>
             ) : null}
@@ -180,9 +180,9 @@ export default function RegisterScreen() {
             style={styles.form}
             >
             <View style={styles.linkRow}>
-              <ThemedText style={styles.linkText}>Já tem conta? </ThemedText> {/* Use ThemedText */}
+              <ThemedText style={styles.linkText}>Já tem conta? </ThemedText> 
               <Link href="/(auth)/login">
-                <ThemedText style={styles.linkHighlight}>Login</ThemedText> {/* Use ThemedText */}
+                <ThemedText style={styles.linkHighlight}>Login</ThemedText> 
               </Link>
             </View>
             </Animated.View>
@@ -207,7 +207,7 @@ export default function RegisterScreen() {
 }
 
 const styles = StyleSheet.create({
-  keyboardAvoidingView: { // New style for KeyboardAvoidingView
+  keyboardAvoidingView: { 
     flex: 1,
   },
   container: {

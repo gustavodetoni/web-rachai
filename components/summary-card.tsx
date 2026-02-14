@@ -1,3 +1,4 @@
+import { Fonts } from '@/constants/theme';
 import React from 'react';
 import { StyleSheet, View, useColorScheme } from 'react-native';
 import { ThemedText } from './themed-text';
@@ -21,9 +22,9 @@ export function SummaryCard({ title, value, type }: SummaryCardProps) {
   };
 
   const colors = {
-    total: '#5DC264',
-    receive: '#5DC264',
-    pay: '#FF5252',
+    total: isDark ? '#4ade80' : '#72e3ad',
+    receive: isDark ? '#4ade80' : '#72e3ad',
+    pay: isDark ? '#ef4444' : '#ca3214',
   };
 
   if (type === 'total') {
@@ -57,41 +58,51 @@ export function SummaryCard({ title, value, type }: SummaryCardProps) {
 const styles = StyleSheet.create({
   card: {
     padding: 20,
-    borderRadius: 12,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: 'rgba(128, 128, 128, 0.2)',
-    backgroundColor: '#fff',
+    borderColor: '#dfdfdf', 
+    backgroundColor: '#fcfcfc', 
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.17,
+    shadowRadius: 3,
+    elevation: 2,
   },
   cardDark: {
-    backgroundColor: '#1C1C1E',
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: '#171717',
+    borderColor: '#292929',
+    shadowColor: '#000',
   },
   totalCard: {
     width: '100%',
     marginBottom: 12,
-    minHeight: 140,
+    minHeight: 120,
     justifyContent: 'center',
     padding: 24,
   },
   smallCard: {
     flex: 1,
     padding: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   title: {
     fontSize: 14,
     opacity: 0.7,
     marginBottom: 8,
+    fontFamily: Fonts.semiBold,
   },
   value: {
-    fontSize: 32,
+    fontSize: 28,
     paddingTop: 8,
-    fontWeight: 'bold',
+    fontFamily: Fonts.bold,
   },
   smallTitle: {
-    fontSize: 14,
+    fontSize: 12,
     opacity: 0.7,
     marginBottom: 8,
     textAlign: 'center',
+    fontFamily: Fonts.semiBold,
   },
   smallValueContainer: {
     flexDirection: 'row',
@@ -100,7 +111,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   smallValue: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: 16,
+    fontFamily: Fonts.semiBold,
   },
 });

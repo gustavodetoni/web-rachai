@@ -1,3 +1,5 @@
+import { Colors, Fonts } from '@/constants/theme';
+import { useThemeColor } from '@/hooks/use-theme-color';
 import React, { useState } from 'react';
 import {
   StyleSheet,
@@ -7,9 +9,6 @@ import {
   View,
 } from 'react-native';
 
-import { useThemeColor } from '@/hooks/use-theme-color';
-import { Colors } from '@/constants/theme';
-
 type InputProps = TextInputProps & {
   label?: string;
   error?: string;
@@ -18,12 +17,13 @@ type InputProps = TextInputProps & {
 export function Input({ label, error, secureTextEntry, ...rest }: InputProps) {
   const [isFocused, setIsFocused] = useState(false);
   
-  const focusedBorderColor = '#5DC264';
-  const inputBgColor = useThemeColor({ light: '#ffffff', dark: Colors.dark.background }, 'background');
-  const borderColor = useThemeColor({ light: '#E5E7EB', dark: '#374151' }, 'background');
+  const focusedBorderColor = useThemeColor({ light: Colors.light.tint, dark: Colors.dark.tint }, 'tint');
+  const inputBgColor = useThemeColor({ light: Colors.light.background, dark: Colors.dark.surface }, 'background');
+  const borderColor = useThemeColor({ light: Colors.light.border, dark: Colors.dark.border }, 'border');
   const textColor = useThemeColor({ light: Colors.light.text, dark: Colors.dark.text }, 'text');
-  const placeholderColor = useThemeColor({ light: '#9CA3AF', dark: '#6B7280' }, 'text');
-  const shadowColor = useThemeColor({ light: '#5DC264', dark: '#000' }, 'background');
+  const placeholderColor = useThemeColor({ light: Colors.light.muted, dark: Colors.dark.muted }, 'text');
+  
+  const shadowColor = '#000';
   
   return (
     <View style={styles.container}>
@@ -34,10 +34,12 @@ export function Input({ label, error, secureTextEntry, ...rest }: InputProps) {
         style={[
           styles.inputWrapper,
           {
-            borderColor: borderColor,
+            borderColor: isFocused ? focusedBorderColor : borderColor,
             backgroundColor: inputBgColor,
             shadowColor: shadowColor,
-            shadowOpacity: isFocused ? 0.18 : 0, // Still apply shadow on focus
+            shadowOpacity: 0.17, 
+            shadowRadius: 3,
+            shadowOffset: { width: 0, height: 1 },
           },
         ]}
       >
@@ -62,23 +64,24 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    fontWeight: '500',
+    fontFamily: Fonts.medium,
     bottom: 4
   },
   inputWrapper: {
-    borderWidth: 1.5,
-    borderRadius: 12,
+    borderWidth: 1,
+    borderRadius: 8, 
     paddingHorizontal: 14,
     paddingVertical: 12,
-    shadowOffset: { width: 0, height: 6 },
-    shadowRadius: 12,
+    elevation: 2, 
   },
   input: {
     fontSize: 16,
+    fontFamily: Fonts.regular,
   },
   error: {
     fontSize: 12,
-    color: '#E03535',
+    color: '#ca3214',
+    fontFamily: Fonts.regular,
   },
 });
 

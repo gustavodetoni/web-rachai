@@ -147,12 +147,12 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   groupName: {
-    fontSize: 24,
+    fontSize: 34, 
   },
   memberButton: {
     width: 44,
     height: 44,
-    borderRadius: 12,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: 'rgba(128, 128, 128, 0.2)',
     alignItems: 'center',
@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   transactionsList: {
-    gap: 4,
+    gap: 12,
   },
   emptyText: {
     textAlign: 'center',

@@ -24,7 +24,7 @@ export function GroupCard({ group }: GroupCardProps) {
     <Pressable onPress={handlePress} style={styles.pressable}>
       <ThemedView
         lightColor="#ffffff"
-        darkColor="#1E2021"
+        darkColor="#171717"
         style={styles.card}
       >
         <View style={styles.thumbnailWrapper}>
@@ -66,9 +66,9 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     gap: 16,
-    borderWidth: 1, // Added border
-    borderColor: 'rgba(128, 128, 128, 0.2)', // Subtle border color for both themes
-    shadowColor: '#000', // Adjusted for better cross-theme visibility
+    borderWidth: 1, 
+    borderColor: 'rgba(128, 128, 128, 0.2)', 
+    shadowColor: '#000', 
     shadowOpacity: 0.08,
     shadowRadius: 5,
     shadowOffset: { width: 0, height: 2 },

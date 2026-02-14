@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, View, useColorScheme } from 'react-native';
 import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
 import { IconSymbol } from './ui/icon-symbol';
+import { Fonts } from '@/constants/theme';
 
 interface TransactionItemProps {
   transaction: TransactionResponse;
@@ -35,8 +36,12 @@ export function TransactionItem({ transaction, onPress }: TransactionItemProps) 
   };
 
   const isIncome = transaction.type === 'RECEIVE' || transaction.type === 'PAYMENT';
-  const amountColor = isIncome ? '#5DC264' : '#FF5252';
-  const stripeColor = isIncome ? '#5DC264' : '#FF5252';
+  const amountColor = isIncome 
+    ? (isDark ? '#4ade80' : '#72e3ad') 
+    : (isDark ? '#ef4444' : '#ca3214');
+  const stripeColor = isIncome 
+    ? (isDark ? '#4ade80' : '#72e3ad') 
+    : (isDark ? '#ef4444' : '#ca3214');
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -57,7 +62,7 @@ export function TransactionItem({ transaction, onPress }: TransactionItemProps) 
             <IconSymbol 
               name={transaction.type === 'RECEIVE' ? 'dollarsign.circle.fill' : getCategoryIcon(transaction.category)} 
               size={24} 
-              color={isDark ? '#fff' : '#333'} 
+              color={isDark ? '#f5f5f5' : '#333'} 
             />
           </View>
 
@@ -65,7 +70,7 @@ export function TransactionItem({ transaction, onPress }: TransactionItemProps) 
             <ThemedText style={styles.category}>{transaction.category}</ThemedText>
             <ThemedText style={styles.name} numberOfLines={1}>{transaction.name}</ThemedText>
             <ThemedText style={styles.details}>
-              {formatDate(transaction.createdAt)}
+              {transaction.type === 'RECEIVE' ? 'Você recebeu' : 'Você pagou'} • {formatDate(transaction.createdAt)}
             </ThemedText>
           </View>
 
@@ -81,26 +86,35 @@ export function TransactionItem({ transaction, onPress }: TransactionItemProps) 
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    borderRadius: 12,
+    borderRadius: 8,
     marginBottom: 12,
     overflow: 'hidden',
-    backgroundColor: '#fff',
+    backgroundColor: '#fcfcfc', 
     borderWidth: 1,
-    borderColor: 'rgba(128, 128, 128, 0.1)',
+    borderColor: '#dfdfdf', 
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.17,
+    shadowRadius: 3,
+    elevation: 2,
   },
   containerDark: {
-    backgroundColor: '#1C1C1E',
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: '#171717', 
+    borderColor: '#292929', 
+    shadowColor: '#000',
   },
   stripe: {
-    width: 6,
+    width: 10,
     height: '100%',
+    borderTopLeftRadius: 7,
+    borderBottomLeftRadius: 7,
   },
   content: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    padding: 12,
+    paddingLeft: 12, 
     gap: 12,
   },
   iconContainer: {
@@ -113,22 +127,25 @@ const styles = StyleSheet.create({
   },
   info: {
     flex: 1,
-    gap: 2,
+    gap: 4,
   },
   category: {
-    fontSize: 12,
-    opacity: 0.6,
+    fontSize: 10,
+    fontFamily: Fonts.semiBold,
+    color: '#888888',
+    textTransform: 'capitalize',
   },
   name: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontFamily: Fonts.semiBold,
   },
   details: {
-    fontSize: 12,
-    opacity: 0.6,
+    fontSize: 10,
+    fontFamily: Fonts.semiBold,
+    color: '#888888',
   },
   amount: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 14,
+    fontFamily: Fonts.semiBold,
   },
 });
