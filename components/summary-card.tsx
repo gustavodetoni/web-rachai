@@ -84,6 +84,7 @@ const styles = StyleSheet.create({
   },
   value: {
     fontSize: 32,
+    paddingTop: 8,
     fontWeight: 'bold',
   },
   smallTitle: {
