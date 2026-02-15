@@ -2,13 +2,15 @@ import { Colors, Fonts } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import React, { useState } from 'react';
 import {
+  ActionSheetIOS,
   Modal,
-  Pressable,
+  Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
   FlatList,
+  Pressable,
 } from 'react-native';
 
 type Option = {
@@ -44,6 +46,28 @@ export function Select({
 
   const selectedLabel = options.find((opt) => opt.value === value)?.label;
 
+  const handlePress = () => {
+    if (Platform.OS === 'ios') {
+      const optionsLabels = options.map((opt) => opt.label);
+      optionsLabels.push('Cancelar');
+
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          options: optionsLabels,
+          cancelButtonIndex: optionsLabels.length - 1,
+          userInterfaceStyle: 'light', // Or dynamic based on theme
+        },
+        (buttonIndex) => {
+          if (buttonIndex < options.length) {
+            onChange(options[buttonIndex].value);
+          }
+        }
+      );
+    } else {
+      setVisible(true);
+    }
+  };
+
   return (
     <View style={styles.container}>
       {label && <Text style={[styles.label, { color: textColor }]}>{label}</Text>}
@@ -56,54 +80,55 @@ export function Select({
             backgroundColor: inputBgColor,
           },
         ]}
-        onPress={() => setVisible(true)}
+        onPress={handlePress}
         activeOpacity={0.7}
       >
         <Text style={[styles.inputText, { color: value ? textColor : placeholderColor }]}>
           {selectedLabel || placeholder}
         </Text>
-        {/* Simple chevron icon could be added here */}
       </TouchableOpacity>
 
       {error && <Text style={styles.error}>{error}</Text>}
 
-      <Modal
-        visible={visible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setVisible(false)}
-      >
-        <Pressable style={styles.modalOverlay} onPress={() => setVisible(false)}>
-          <View style={[styles.modalContent, { backgroundColor: modalBgColor }]}>
-            <FlatList
-              data={options}
-              keyExtractor={(item) => item.value}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={[
-                    styles.optionItem,
-                    { backgroundColor: item.value === value ? focusedBorderColor + '20' : 'transparent' }
-                  ]}
-                  onPress={() => {
-                    onChange(item.value);
-                    setVisible(false);
-                  }}
-                >
-                  <Text style={[
-                    styles.optionText, 
-                    { 
-                      color: textColor,
-                      fontWeight: item.value === value ? '600' : '400'
-                    }
-                  ]}>
-                    {item.label}
-                  </Text>
-                </TouchableOpacity>
-              )}
-            />
-          </View>
-        </Pressable>
-      </Modal>
+      {Platform.OS === 'android' && (
+        <Modal
+          visible={visible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setVisible(false)}
+        >
+          <Pressable style={styles.modalOverlay} onPress={() => setVisible(false)}>
+            <View style={[styles.modalContent, { backgroundColor: modalBgColor }]}>
+              <FlatList
+                data={options}
+                keyExtractor={(item) => item.value}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={[
+                      styles.optionItem,
+                      { backgroundColor: item.value === value ? focusedBorderColor + '20' : 'transparent' }
+                    ]}
+                    onPress={() => {
+                      onChange(item.value);
+                      setVisible(false);
+                    }}
+                  >
+                    <Text style={[
+                      styles.optionText, 
+                      { 
+                        color: textColor,
+                        fontWeight: item.value === value ? '600' : '400'
+                      }
+                    ]}>
+                      {item.label}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              />
+            </View>
+          </Pressable>
+        </Modal>
+      )}
     </View>
   );
 }
@@ -145,10 +170,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     maxHeight: '50%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
     elevation: 5,
   },
   optionItem: {

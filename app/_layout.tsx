@@ -12,6 +12,7 @@ import {
   Outfit_500Medium,
   Outfit_600SemiBold,
   Outfit_700Bold,
+  Outfit_800ExtraBold,
 } from '@expo-google-fonts/outfit';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -61,6 +62,7 @@ export default function RootLayout() {
     Outfit_500Medium,
     Outfit_600SemiBold,
     Outfit_700Bold,
+    Outfit_800ExtraBold,
   });
 
   useEffect(() => {
