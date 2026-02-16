@@ -1,10 +1,37 @@
+import { Fonts } from '@/constants/theme';
 import { TransactionResponse } from '@/functions/transaction-get';
 import React from 'react';
 import { Pressable, StyleSheet, View, useColorScheme } from 'react-native';
+import { SvgProps } from 'react-native-svg';
 import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
-import { IconSymbol } from './ui/icon-symbol';
-import { Fonts } from '@/constants/theme';
+
+import DrinksIcon from '@/assets/images/categories/drinks.svg';
+import EntertainmentIcon from '@/assets/images/categories/entreteriment.svg';
+import FoodIcon from '@/assets/images/categories/food.svg';
+import FuelIcon from '@/assets/images/categories/fuel.svg';
+import MoneyIcon from '@/assets/images/categories/money.svg';
+import OthersIcon from '@/assets/images/categories/others.svg';
+import RentIcon from '@/assets/images/categories/rent.svg';
+
+const CATEGORY_IMAGES: Record<string, React.FC<SvgProps>> = {
+  FOOD: FoodIcon,
+  FUEL: FuelIcon,
+  DRINKS: DrinksIcon,
+  RENT: RentIcon,
+  ENTERTAINMENT: EntertainmentIcon,
+  OTHERS: OthersIcon,
+};
+
+const categoryLabels: Record<string, string> = {
+  FOOD: 'Alimentação',
+  FUEL: 'Combustível',
+  DRINKS: 'Bebidas',
+  RENT: 'Aluguel',
+  ENTERTAINMENT: 'Entretenimento',
+  OTHERS: 'Outros',
+};
+
 
 interface TransactionItemProps {
   transaction: TransactionResponse;
@@ -21,27 +48,15 @@ export function TransactionItem({ transaction, onPress }: TransactionItemProps) 
     }).format(val);
   };
 
-  const getCategoryIcon = (category: string): any => {
-    const cat = category.toLowerCase();
-    if (cat.includes('alimentação') || cat.includes('comida') || cat.includes('restaurante')) {
-      return 'restaurant';
-    }
-    if (cat.includes('transporte') || cat.includes('viagem')) {
-      return 'directions-bus';
-    }
-    if (cat.includes('mercado') || cat.includes('compras')) {
-      return 'cart.fill';
-    }
-    return 'receipt';
+  const getCategoryImage = (category: string) => {
+    const key = category?.toUpperCase();
+    return CATEGORY_IMAGES[key] || CATEGORY_IMAGES.OTHERS;
   };
 
-  const isIncome = transaction.type === 'RECEIVE' || transaction.type === 'PAYMENT';
+  const isIncome = transaction.type === 'RECEIVE';
   const amountColor = isIncome 
-    ? (isDark ? '#4ade80' : '#72e3ad') 
-    : (isDark ? '#ef4444' : '#ca3214');
-  const stripeColor = isIncome 
-    ? (isDark ? '#4ade80' : '#72e3ad') 
-    : (isDark ? '#ef4444' : '#ca3214');
+    ? (isDark ? '#4ade80' : '#4ade80') 
+    : (isDark ? '#ef4444' : '#ef4444');
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -52,25 +67,33 @@ export function TransactionItem({ transaction, onPress }: TransactionItemProps) 
     }).toUpperCase();
   };
 
+  const getDetailsInfo = () => {
+    return categoryLabels[transaction.category] ?? transaction.category;
+  };
+
+  const receiver = transaction.type === 'RECEIVE' || transaction.type === 'PAYMENT' || transaction.type === 'TRANSFER';
+
+  const CategoryIcon = getCategoryImage(transaction.category);
+
   return (
     <Pressable onPress={() => onPress(transaction.id)}>
       <ThemedView style={[styles.container, isDark && styles.containerDark]}>
-        <View style={[styles.stripe, { backgroundColor: stripeColor }]} />
         
         <View style={styles.content}>
           <View style={styles.iconContainer}>
-            <IconSymbol 
-              name={transaction.type === 'RECEIVE' ? 'dollarsign.circle.fill' : getCategoryIcon(transaction.category)} 
-              size={24} 
-              color={isDark ? '#f5f5f5' : '#333'} 
-            />
+            {receiver ? (
+              <MoneyIcon width={40} height={40} viewBox="0 0 1024 1024" />
+            ) : (
+              <CategoryIcon width={40} height={40} viewBox="0 0 1024 1024" />
+            )}
           </View>
 
           <View style={styles.info}>
-            <ThemedText style={styles.category}>{transaction.category}</ThemedText>
-            <ThemedText style={styles.name} numberOfLines={1}>{transaction.name}</ThemedText>
+            <ThemedText style={styles.name} numberOfLines={1}>
+              {transaction.name.charAt(0).toUpperCase() + transaction.name.slice(1)}
+            </ThemedText>
             <ThemedText style={styles.details}>
-              {transaction.type === 'RECEIVE' ? 'Você recebeu' : 'Você pagou'} • {formatDate(transaction.createdAt)}
+              {getDetailsInfo()} • {formatDate(transaction.createdAt)}
             </ThemedText>
           </View>
 
@@ -87,7 +110,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     borderRadius: 8,
-    marginBottom: 12,
+    marginBottom: 4,
     overflow: 'hidden',
     backgroundColor: '#fcfcfc', 
     borderWidth: 1,
@@ -100,7 +123,7 @@ const styles = StyleSheet.create({
   },
   containerDark: {
     backgroundColor: '#171717', 
-    borderColor: '#292929', 
+    borderColor: '#171717', 
     shadowColor: '#000',
   },
   stripe: {
@@ -120,14 +143,14 @@ const styles = StyleSheet.create({
   iconContainer: {
     width: 44,
     height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(128, 128, 128, 0.1)',
+    // borderRadius: 22,
+    // backgroundColor: 'rgba(128, 128, 128, 0.1)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   info: {
     flex: 1,
-    gap: 4,
+    padding: 4, 
   },
   category: {
     fontSize: 10,
@@ -136,16 +159,16 @@ const styles = StyleSheet.create({
     textTransform: 'capitalize',
   },
   name: {
-    fontSize: 16,
+    fontSize: 18,
     fontFamily: Fonts.semiBold,
   },
   details: {
-    fontSize: 10,
+    fontSize: 12,
     fontFamily: Fonts.semiBold,
     color: '#888888',
   },
   amount: {
-    fontSize: 14,
+    fontSize: 16,
     fontFamily: Fonts.semiBold,
   },
 });

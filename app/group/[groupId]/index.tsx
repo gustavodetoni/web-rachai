@@ -12,6 +12,7 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { getExpenseSummary } from '@/functions/expense-summary-get';
 import { getGroups } from '@/functions/groups-get';
 import { getTransactions } from '@/functions/transaction-get';
+import { Fonts } from '@/constants/theme';
 
 export default function GroupScreen() {
   const params = useGlobalSearchParams();
@@ -181,6 +182,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     opacity: 0.5,
     marginBottom: 16,
+    fontFamily: Fonts.semiBold,
   },
   transactionsList: {
     gap: 12,

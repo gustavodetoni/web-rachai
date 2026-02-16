@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
   },
   cardDark: {
     backgroundColor: '#171717',
-    borderColor: '#292929',
+    borderColor: '#171717',
     shadowColor: '#000',
   },
   totalCard: {
@@ -83,8 +83,8 @@ const styles = StyleSheet.create({
   smallCard: {
     flex: 1,
     padding: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
   },
   title: {
     fontSize: 14,
