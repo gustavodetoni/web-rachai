@@ -23,7 +23,7 @@ export function Input({ label, error, secureTextEntry, ...rest }: InputProps) {
   const textColor = useThemeColor({ light: Colors.light.text, dark: Colors.dark.text }, 'text');
   const placeholderColor = useThemeColor({ light: Colors.light.muted, dark: Colors.dark.muted }, 'text');
   
-  const shadowColor = '#000';
+  const shadowColor = '#000000';
   
   return (
     <View style={styles.container}>
@@ -37,9 +37,9 @@ export function Input({ label, error, secureTextEntry, ...rest }: InputProps) {
             borderColor: isFocused ? focusedBorderColor : borderColor,
             backgroundColor: inputBgColor,
             shadowColor: shadowColor,
-            shadowOpacity: 0.17, 
-            shadowRadius: 3,
-            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.06,
+            shadowRadius: 18,
+            shadowOffset: { width: 0, height: 4 },
           },
         ]}
       >
@@ -84,4 +84,3 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.regular,
   },
 });
-

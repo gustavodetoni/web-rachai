@@ -4,8 +4,8 @@
  */
 
 
-const tintColorLight = '#72e3ad'; 
-const tintColorDark = '#4ade80';
+const tintColorLight = '#35B16C'; 
+const tintColorDark = '#35B16C';
 
 export const Colors = {
   light: {
@@ -19,9 +19,9 @@ export const Colors = {
     error: '#ca3214', 
     warning: '#f59e0b', 
     surface: '#fcfcfc',
-    border: '#dfdfdf',
+    border: '#dfdfdf85',
     card: '#fcfcfc', 
-    muted: '#202020', 
+    muted: '#2020206b', 
   },
   dark: {
     text: '#e2e8f0', 

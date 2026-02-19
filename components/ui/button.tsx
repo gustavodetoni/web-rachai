@@ -60,8 +60,8 @@ export function Button({
     variant === 'outline'
       ? outlineColor
       : destructive
-      ? '#ffffff'
-      : '#1e2723';
+      ? '#1e2723'
+      : '#ffffff';
 
   return (
     <TouchableOpacity
