@@ -1,40 +1,54 @@
+import { AntDesign } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
-import { useFocusEffect, useGlobalSearchParams } from 'expo-router';
+import { useFocusEffect, useGlobalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, View, useColorScheme } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { Sidebar } from '@/components/sidebar';
 import { SummaryCard } from '@/components/summary-card';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { TransactionItem } from '@/components/transaction-item';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Colors, Fonts } from '@/constants/theme';
 import { getExpenseSummary } from '@/functions/expense-summary-get';
 import { getGroups } from '@/functions/groups-get';
 import { getTransactions } from '@/functions/transaction-get';
-import { Fonts } from '@/constants/theme';
+import { getUser } from '@/functions/user-get';
 
 export default function GroupScreen() {
+  const router = useRouter();
   const params = useGlobalSearchParams();
   const groupId = Array.isArray(params.groupId) ? params.groupId[0] : params.groupId;
   const insets = useSafeAreaInsets();
+  const colorScheme = useColorScheme();
+  
   const [selectedTransactionId, setSelectedTransactionId] = useState<string | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const { data: groups } = useQuery({
     queryKey: ['groups'],
     queryFn: getGroups,
   });
 
+  const { data: user } = useQuery({
+    queryKey: ['user'],
+    queryFn: getUser,
+  });
+
   const { data: summary, isLoading: isLoadingSummary, refetch: refetchSummary } = useQuery({
     queryKey: ['expense-summary', groupId],
     queryFn: () => getExpenseSummary(groupId!),
     enabled: !!groupId,
+    gcTime: 0,
   });
 
   const { data: transactions, isLoading: isLoadingTransactions, refetch: refetchTransactions } = useQuery({
     queryKey: ['transactions', groupId],
     queryFn: () => getTransactions(groupId!),
     enabled: !!groupId,
+    gcTime: 0,
   });
 
   useFocusEffect(
@@ -45,7 +59,7 @@ export default function GroupScreen() {
   );
 
   const group = groups?.find((g) => g.id === groupId);
-
+  const iconColor = colorScheme === 'dark' ? Colors.dark.text : Colors.light.text;
 
   const handleTransactionPress = (id: string) => {
     setSelectedTransactionId(id);
@@ -53,6 +67,13 @@ export default function GroupScreen() {
 
   const closeModal = () => {
     setSelectedTransactionId(null);
+  };
+
+  const handleGroupSelect = (newGroupId: string) => {
+    setIsSidebarOpen(false);
+    if (newGroupId !== groupId) {
+      router.replace(`/group/${newGroupId}`);
+    }
   };
 
   return (
@@ -65,9 +86,14 @@ export default function GroupScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <ThemedText type="subtitle" style={styles.groupName}>
-            {group?.name || 'Carregando...'}
-          </ThemedText>
+          <View style={styles.headerLeft}>
+            <Pressable onPress={() => setIsSidebarOpen(true)} style={styles.menuButton}>
+              <AntDesign name="align-left" size={24} color={iconColor} />
+            </Pressable>
+            <ThemedText type="subtitle" style={styles.groupName}>
+              {group?.name || 'Carregando...'}
+            </ThemedText>
+          </View>
           <Pressable style={styles.memberButton}>
             <IconSymbol name="person.2.fill" size={20} color="rgba(128, 128, 128, 0.6)" />
           </Pressable>
@@ -119,6 +145,15 @@ export default function GroupScreen() {
         </View>
       </ScrollView>
 
+      <Sidebar
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+        user={user}
+        groups={groups}
+        currentGroupId={groupId}
+        onSelectGroup={handleGroupSelect}
+      />
+
       <Modal
         visible={!!selectedTransactionId}
         transparent={true}
@@ -152,8 +187,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 24,
   },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flex: 1,
+  },
+  menuButton: {
+    padding: 4,
+  },
   groupName: {
     fontSize: 34, 
+    flex: 1,
   },
   memberButton: {
     width: 44,
@@ -221,4 +266,3 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
-

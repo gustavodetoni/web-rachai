@@ -1,5 +1,6 @@
-import { JWT_NAME, JWT_EXPIRES_AT_NAME } from '@/constants/config';
+import { JWT_EXPIRES_AT_NAME, JWT_NAME } from '@/constants/config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { jwtDecode } from 'jwt-decode';
 import React, {
   createContext,
   useCallback,
@@ -8,7 +9,6 @@ import React, {
   useState,
   type ReactNode,
 } from 'react';
-import { jwtDecode } from 'jwt-decode';
 
 type AuthContextValue = {
   accessToken: string | null;
@@ -73,6 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setExpiresAt(null);
     await AsyncStorage.removeItem(JWT_NAME);
     await AsyncStorage.removeItem(JWT_EXPIRES_AT_NAME);
+    await AsyncStorage.removeItem('lastSessionGroupId');
   }, []);
 
   useEffect(() => {

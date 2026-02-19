@@ -1,119 +1,128 @@
-import { useQuery } from '@tanstack/react-query'
-import { useRouter } from 'expo-router'
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'; // Import useSafeAreaInsets
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useQuery } from '@tanstack/react-query';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { GroupCard } from '@/components/group-card'
-import { HelloWave } from '@/components/hello-wave'
-import { ThemedText } from '@/components/themed-text'
-import { ThemedView } from '@/components/themed-view'
-import { IconSymbol } from '@/components/ui/icon-symbol'
-import { getGroups } from '@/functions/groups-get'
-import { getUser } from '@/functions/user-get'
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
+import { IconSymbol } from '@/components/ui/icon-symbol';
+import { getGroups } from '@/functions/groups-get';
 
-export default function HomeScreen() {
-  const router = useRouter()
-  const insets = useSafeAreaInsets()
-
-  const { data: user } = useQuery({
-    queryKey: ['user'],
-    queryFn: getUser,
-  })
+export default function GroupIndexScreen() {
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const [isCheckingStorage, setIsCheckingStorage] = useState(true);
 
   const {
     data: groups,
-    isLoading: isLoadingGroups,
-    isError: isErrorGroups,
+    isLoading,
+    isError,
+    refetch,
   } = useQuery({
     queryKey: ['groups'],
     queryFn: getGroups,
-  })
+  });
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
+
+  useEffect(() => {
+    async function checkLastGroup() {
+      if (!groups || groups.length === 0) {
+        setIsCheckingStorage(false);
+        return;
+      }
+
+      try {
+        const lastGroupId = await AsyncStorage.getItem('lastSessionGroupId');
+        
+        if (lastGroupId) {
+          const groupExists = groups.find(g => g.id === lastGroupId);
+          if (groupExists) {
+            router.replace(`/group/${lastGroupId}`);
+            return;
+          }
+        }
+        router.replace(`/group/${groups[0].id}`);
+      } catch (error) {
+        console.error('Error checking local storage:', error);
+        router.replace(`/group/${groups[0].id}`);
+      } finally {
+        setIsCheckingStorage(false);
+      }
+    }
+
+    if (!isLoading && groups) {
+      checkLastGroup();
+    } else if (!isLoading && !groups) {
+        setIsCheckingStorage(false);
+    }
+  }, [groups, isLoading, router]);
+
 
   const handleCreateGroup = () => {
-    router.push('/group/create-group')
+    router.push('/group/create-group');
+  };
+
+  if (isLoading || (groups && groups.length > 0 && isCheckingStorage)) {
+    return (
+      <ThemedView style={[styles.container, styles.centered]}>
+        <ActivityIndicator size="large" />
+      </ThemedView>
+    );
+  }
+
+  if (isError) {
+    return (
+      <ThemedView style={[styles.container, styles.centered]}>
+        <ThemedText>Não foi possível carregar seus grupos.</ThemedText>
+        <Pressable onPress={() => refetch()} style={{ marginTop: 20 }}>
+          <ThemedText type="link">Tentar novamente</ThemedText>
+        </Pressable>
+      </ThemedView>
+    );
   }
 
   return (
-    <ThemedView style={styles.screen}>
-      <ScrollView
-        contentContainerStyle={[
-          styles.scrollContainer,
-          { paddingTop: insets.top + 24 },
-        ]}
-        pointerEvents="box-none"
-      >
-        <ThemedView style={styles.header}>
-          <ThemedText type="title">
-            {user ? `Bem-vindo, ${user.name.split(' ')[0]}!` : 'Bem-vindo!'}
-          </ThemedText>
-          <HelloWave />
-        </ThemedView>
-
-        <ThemedView style={styles.sectionHeader}>
-          <ThemedText type="subtitle">Seus grupos</ThemedText>
-          <ThemedText style={styles.sectionSubtitle}>
-            Acompanhe e crie novos rachinhas com seus amigos.
+    <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
+      <View style={styles.content}>
+        <ThemedView style={styles.emptyState}>
+          <IconSymbol name="plus" size={48} color="gray" />
+          <ThemedText type="subtitle">Nenhum grupo por aqui ainda</ThemedText>
+          <ThemedText style={styles.emptyStateText}>
+            Toque no botão + para criar seu primeiro grupo e começar a organizar
+            seus gastos em conjunto.
           </ThemedText>
         </ThemedView>
-
-        <View style={styles.groupsContainer}>
-          {isLoadingGroups ? (
-            <ThemedText>Carregando seus grupos...</ThemedText>
-          ) : isErrorGroups ? (
-            <ThemedText>
-              Não foi possível carregar seus grupos. Tente novamente mais tarde.
-            </ThemedText>
-          ) : !groups || groups.length === 0 ? (
-            <ThemedView style={styles.emptyState}>
-              <IconSymbol name="plus" size={48} color="gray" />
-              <ThemedText type="subtitle">
-                Nenhum grupo por aqui ainda
-              </ThemedText>
-              <ThemedText style={styles.emptyStateText}>
-                Toque no botão + para criar seu primeiro grupo e começar a
-                organizar seus gastos em conjunto.
-              </ThemedText>
-            </ThemedView>
-          ) : (
-            groups.map((group) => <GroupCard key={group.id} group={group} />)
-          )}
-        </View>
-      </ScrollView>
+      </View>
 
       <Pressable
-        style={[styles.fab, { bottom: insets.bottom + 10 }]}
+        style={[styles.fab, { bottom: insets.bottom + 20 }]}
         onPress={handleCreateGroup}
-        pointerEvents="auto"
       >
         <IconSymbol name="plus" size={28} color="#ffffff" />
       </Pressable>
     </ThemedView>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
-  screen: {
+  container: {
     flex: 1,
   },
-  scrollContainer: {
-    paddingHorizontal: 18,
-  },
-  header: {
-    flexDirection: 'row',
+  centered: {
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: 8,
   },
-  sectionHeader: {
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  sectionSubtitle: {
-    opacity: 0.7,
-    fontSize: 14,
-  },
-  groupsContainer: {
-    marginTop: 16,
-    gap: 12,
+  content: {
+    flex: 1,
+    paddingHorizontal: 20,
+    justifyContent: 'center',
   },
   emptyState: {
     alignItems: 'center',
@@ -144,6 +153,5 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 6,
     elevation: 12,
-    zIndex: 999,
   },
-})
+});

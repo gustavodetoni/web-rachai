@@ -38,7 +38,7 @@ export default function Index() {
 const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,
-    backgroundColor: '#76db75',
+    backgroundColor: '#35B16C',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
   logoText: {
     fontFamily: Fonts.extraBold,
     fontSize: 70,
-    color: '#000000',
+    color: '#ffffff',
     letterSpacing: -2,
   },
 });
