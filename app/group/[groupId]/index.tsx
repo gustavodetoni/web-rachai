@@ -88,7 +88,7 @@ export default function GroupScreen() {
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <Pressable onPress={() => setIsSidebarOpen(true)} style={styles.menuButton}>
-              <AntDesign name="align-left" size={24} color={iconColor} />
+              <AntDesign name="menu-fold" size={24} color={iconColor} />
             </Pressable>
             <ThemedText type="subtitle" style={styles.groupName}>
               {group?.name || 'Carregando...'}

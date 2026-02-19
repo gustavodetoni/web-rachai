@@ -1,12 +1,13 @@
 import { Colors, Fonts } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import React, { useState } from 'react';
+import React, { useRef } from 'react';
 import {
   StyleSheet,
   Text,
   TextInput,
   TextInputProps,
   View,
+  Pressable,
 } from 'react-native';
 
 type InputProps = TextInputProps & {
@@ -15,26 +16,24 @@ type InputProps = TextInputProps & {
 };
 
 export function Input({ label, error, secureTextEntry, ...rest }: InputProps) {
-  const [isFocused, setIsFocused] = useState(false);
-  
-  const focusedBorderColor = useThemeColor({ light: Colors.light.tint, dark: Colors.dark.tint }, 'tint');
   const inputBgColor = useThemeColor({ light: Colors.light.background, dark: Colors.dark.surface }, 'background');
   const borderColor = useThemeColor({ light: Colors.light.border, dark: Colors.dark.border }, 'border');
   const textColor = useThemeColor({ light: Colors.light.text, dark: Colors.dark.text }, 'text');
   const placeholderColor = useThemeColor({ light: Colors.light.muted, dark: Colors.dark.muted }, 'text');
   
   const shadowColor = '#000000';
+  const inputRef = useRef<TextInput>(null);
   
   return (
     <View style={styles.container}>
       {label ? (
         <Text style={[styles.label, { color: textColor }]}>{label}</Text>
       ) : null}
-      <View
+      <Pressable
         style={[
           styles.inputWrapper,
           {
-            borderColor: isFocused ? focusedBorderColor : borderColor,
+            borderColor: borderColor,
             backgroundColor: inputBgColor,
             shadowColor: shadowColor,
             shadowOpacity: 0.06,
@@ -42,16 +41,18 @@ export function Input({ label, error, secureTextEntry, ...rest }: InputProps) {
             shadowOffset: { width: 0, height: 4 },
           },
         ]}
+        onPress={() => {
+          inputRef.current?.focus();
+        }}
       >
         <TextInput
+          ref={inputRef}
           style={[styles.input, { color: textColor }]}
           placeholderTextColor={placeholderColor}
           secureTextEntry={secureTextEntry}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
           {...rest}
         />
-      </View>
+      </Pressable>
       {error ? <Text style={styles.error}>{error}</Text> : null}
     </View>
   );
