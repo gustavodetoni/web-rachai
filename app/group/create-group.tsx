@@ -1,3 +1,4 @@
+import { MaterialIcons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
@@ -7,8 +8,10 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
-  StyleSheet,
+  ScrollView,
+    StyleSheet,
   Text,
+  TouchableOpacity,
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
@@ -16,8 +19,8 @@ import { z } from 'zod';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { Colors } from '@/constants/theme';
 import { createGroup } from '@/functions/groups-create';
-import { Button } from '@components/ui/button';
 import { ImagePickerComponent } from '@components/ui/image-picker';
 import { Input } from '@components/ui/input';
 
@@ -48,9 +51,12 @@ export default function CreateGroupScreen() {
 
   const mutation = useMutation({
     mutationFn: (payload: FormData) => createGroup(payload),
-    onSuccess: async () => {
+    onSuccess: async (data) => {
       await queryClient.invalidateQueries({ queryKey: ['groups'] });
-      router.back();
+      router.replace({
+        pathname: '/group/invite-group',
+        params: { groupId: data.id }
+      });
     },
   });
 
@@ -86,83 +92,97 @@ export default function CreateGroupScreen() {
       >
         <ThemedView style={styles.container}>
           <View style={styles.header}>
-            <ThemedText type="title">Novo grupo</ThemedText>
-            <ThemedText style={styles.subtitle}>
-              Dê um nome e uma breve descrição para o seu grupo.
-            </ThemedText>
+            <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+              <MaterialIcons name="chevron-left" size={32} color={Colors.dark.text} />
+            </TouchableOpacity>
+            <TouchableOpacity 
+              onPress={handleSubmit(onSubmit)} 
+              disabled={isSubmitting || mutation.isPending}
+              style={styles.backButton}
+            >
+              <ThemedText type="subtitle" style={{ color: Colors.light.tint }}>
+                Criar grupo
+              </ThemedText>
+            </TouchableOpacity>
           </View>
+            <View style={styles.subHeader}>
+              <ThemedText type="title" style={{ color: Colors.light.tint }}>Novo grupo</ThemedText>
+              <ThemedText style={styles.subtitle}>
+                Dê um nome e uma breve descrição para o seu grupo.
+              </ThemedText>
+            </View>
 
-          <View style={styles.form}>
-            <Controller
-              control={control}
-              name="thumbnail"
-              render={({ field: { value, onChange }, fieldState: { error } }) => (
-                <ImagePickerComponent
-                  value={value}
-                  onChange={onChange}
-                  error={error?.message}
-                />
-              )}
-            />
+          <ScrollView 
+            style={styles.scrollView} 
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.form}>
+              <Controller
+                control={control}
+                name="thumbnail"
+                render={({ field: { value, onChange }, fieldState: { error } }) => (
+                  <ImagePickerComponent
+                    value={value}
+                    onChange={onChange}
+                    error={error?.message}
+                  />
+                )}
+              />
 
-            <View style={styles.fieldSpacing} />
+              <View style={styles.fieldSpacing} />
 
-            <Controller
-              control={control}
-              name="name"
-              render={({ field: { value, onChange, onBlur }, fieldState: { error } }) => (
-                <Input
-                  label="Nome do grupo"
-                  placeholder="Viagem com amigos"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  autoCapitalize="sentences"
-                  error={error?.message}
-                />
-              )}
-            />
+              <Controller
+                control={control}
+                name="name"
+                render={({ field: { value, onChange, onBlur }, fieldState: { error } }) => (
+                  <Input
+                    label="Nome do grupo"
+                    placeholder="Viagem com amigos"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    autoCapitalize="sentences"
+                    error={error?.message}
+                  />
+                )}
+              />
 
-            <View style={styles.fieldSpacing} />
+              <View style={styles.fieldSpacing} />
 
-            <Controller
-              control={control}
-              name="description"
-              render={({ field: { value, onChange, onBlur } }) => (
-                <Input
-                  label="Descrição (opcional)"
-                  placeholder="Descreva rapidamente para que é esse grupo"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  multiline
-                  numberOfLines={3}
-                  style={styles.multilineInput}
-                />
-              )}
-            />
+              <Controller
+                control={control}
+                name="description"
+                render={({ field: { value, onChange, onBlur } }) => (
+                  <Input
+                    label="Descrição (opcional)"
+                    placeholder="Descreva rapidamente para que é esse grupo"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    multiline
+                    numberOfLines={3}
+                    style={styles.multilineInput}
+                  />
+                )}
+              />
 
-            {mutation.error ? (
-              <Text style={styles.formError}>
-                {(mutation.error as Error).message ||
-                  'Não foi possível criar o grupo. Tente novamente.'}
-              </Text>
-            ) : null}
-          </View>
-
+              {mutation.error ? (
+                <Text style={styles.formError}>
+                  {(mutation.error as Error).message ||
+                    'Não foi possível criar o grupo. Tente novamente.'}
+                </Text>
+              ) : null}
+            </View>
+          </ScrollView>
+{/* 
           <View style={styles.footer}>
-            <Button
-              title="Cancelar"
-              variant="outline"
-              onPress={() => router.back()}
-              style={styles.cancelButton}
-            />
             <Button
               title="Criar grupo"
               onPress={handleSubmit(onSubmit)}
               loading={isSubmitting || mutation.isPending}
             />
-          </View>
+          </View> */}
         </ThemedView>
       </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
@@ -176,19 +196,33 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 18,
-    paddingTop: 90,
-    paddingBottom: 60,
-    justifyContent: 'space-between',
-    gap: 24,
+    paddingTop: 80,
   },
   header: {
-    gap: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    marginBottom: 24,
+  },
+  subHeader: {
+    marginBottom: 24,
+  },
+  backButton: {
+    marginLeft: -8,
   },
   subtitle: {
     opacity: 0.8,
+    fontSize: 14,
+    marginTop: 4,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 24,
   },
   form: {
-    flex: 1,
     gap: 12,
   },
   fieldSpacing: {
@@ -200,10 +234,9 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   footer: {
-    gap: 12,
-  },
-  cancelButton: {
-    backgroundColor: 'transparent',
+    paddingVertical: 16,
+    borderTopWidth: 1,
+    borderTopColor: 'transparent',
   },
   multilineInput: {
     textAlignVertical: 'top',

@@ -20,7 +20,7 @@ import { getExpenseDebts, type Debt } from '@/functions/expense-debts-get';
 import {
   getExpenseReceivables
 } from '@/functions/expense-receivables-get';
-import { updateExpenseSplit } from '@/functions/expense-split-update';
+import { settleExpenseSplits } from '@/functions/expense-settle';
 
 export default function PendingsScreen() {
   const params = useGlobalSearchParams();
@@ -50,24 +50,24 @@ export default function PendingsScreen() {
     }, [refetchDebts, refetchReceivables])
   );
 
-  const payMutation = useMutation({
-    mutationFn: async (expenseSplitIds: string[]) => {
-      await Promise.all(
-        expenseSplitIds.map((id) =>
-          updateExpenseSplit(id, { paid: true })
-        )
-      );
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['expense-debts', groupId] });
-      queryClient.invalidateQueries({ queryKey: ['expense-summary', groupId] }); // Also update summary
-      Alert.alert('Sucesso', 'Pagamento realizado!');
-    },
-    onError: (error) => {
-      Alert.alert('Erro', 'Não foi possível registrar o pagamento.');
-      console.error(error);
-    },
-  });
+  // const payMutation = useMutation({
+  //   mutationFn: async (expenseSplitIds: string[]) => {
+  //     await Promise.all(
+  //       expenseSplitIds.map((id) =>
+  //         settleExpenseSplits(id)
+  //       )
+  //     );
+  //   },
+  //   onSuccess: () => {
+  //     queryClient.invalidateQueries({ queryKey: ['expense-debts', groupId] });
+  //     queryClient.invalidateQueries({ queryKey: ['expense-summary', groupId] }); // Also update summary
+  //     Alert.alert('Sucesso', 'Pagamento realizado!');
+  //   },
+  //   onError: (error) => {
+  //     Alert.alert('Erro', 'Não foi possível registrar o pagamento.');
+  //     console.error(error);
+  //   },
+  // });
 
   const handlePay = (debt: Debt) => {
     Alert.alert(
@@ -77,7 +77,7 @@ export default function PendingsScreen() {
         { text: 'Cancelar', style: 'cancel' },
         {
           text: 'Pagar',
-          onPress: () => payMutation.mutate(debt.expenseSplitIds),
+          // onPress: () => payMutation.mutate(debt.expenseSplitIds),
         },
       ]
     );
@@ -143,13 +143,13 @@ export default function PendingsScreen() {
                 <TouchableOpacity
                   style={styles.payButton}
                   onPress={() => handlePay(debt)}
-                  disabled={payMutation.isPending}
+                  // disabled={payMutation.isPending}
                 >
-                  {payMutation.isPending ? (
+                  {/* {payMutation.isPending ? (
                     <ActivityIndicator color="#fff" />
                   ) : (
                     <ThemedText style={styles.payButtonText}>Pagar</ThemedText>
-                  )}
+                  )} */}
                 </TouchableOpacity>
               </View>
             </View>

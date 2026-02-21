@@ -2,11 +2,11 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import React from 'react';
 import {
-    Image,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 import { Colors } from '@/constants/theme';
@@ -21,7 +21,7 @@ type ImagePickerProps = {
 
 export function ImagePickerComponent({ value, onChange, label, error }: ImagePickerProps) {
   const inputBgColor = useThemeColor({ light: '#ffffff', dark: Colors.dark.background }, 'background');
-  const borderColor = useThemeColor({ light: '#E5E7EB', dark: '#374151' }, 'background');
+  const borderColor = useThemeColor({ light: '#E5E7EB', dark: '#E5E7EB' }, 'background');
   const textColor = useThemeColor({ light: Colors.light.text, dark: Colors.dark.text }, 'text');
   const iconColor = useThemeColor({ light: '#9CA3AF', dark: '#6B7280' }, 'text');
 
@@ -49,37 +49,41 @@ export function ImagePickerComponent({ value, onChange, label, error }: ImagePic
       ) : null}
 
       <View style={styles.content}>
-        <TouchableOpacity
-          style={[
-            styles.picker,
-            {
-              backgroundColor: inputBgColor,
-              borderColor: borderColor,
-            },
-          ]}
-          onPress={pickImage}
-          activeOpacity={0.7}
-        >
-          {value ? (
-            <View style={styles.imageContainer}>
-              <Image source={{ uri: value }} style={styles.image} />
+          <View style={styles.imageWrapper}>
+            <TouchableOpacity
+              style={[
+                styles.picker,
+                {
+                  backgroundColor: inputBgColor,
+                  borderColor: borderColor,
+                },
+                value ? styles.pickerHasImage : null,
+              ]}
+              onPress={pickImage}
+              activeOpacity={0.7}
+            >
+              {value ? (
+                <Image source={{ uri: value }} style={styles.image} />
+              ) : (
+                <View style={styles.placeholder}>
+                  <Ionicons name="camera-outline" size={32} color={iconColor} />
+                  <Text style={[styles.placeholderText, { color: iconColor }]}>
+                    Adicionar foto
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+
+            {value && (
               <TouchableOpacity
                 style={styles.removeButton}
                 onPress={removeImage}
                 activeOpacity={0.8}
               >
-                <Ionicons name="close" size={16} color="#FFF" />
+                <Ionicons name="trash-outline" size={16} color="#FFF" />
               </TouchableOpacity>
-            </View>
-          ) : (
-            <View style={styles.placeholder}>
-              <Ionicons name="camera-outline" size={32} color={iconColor} />
-              <Text style={[styles.placeholderText, { color: iconColor }]}>
-                Adicionar foto
-              </Text>
-            </View>
-          )}
-        </TouchableOpacity>
+            )}
+          </View>
       </View>
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
@@ -101,25 +105,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  picker: {
+  imageWrapper: {
+    position: 'relative',
     width: 120,
     height: 120,
+  },
+  picker: {
+    width: '100%',
+    height: '100%',
     borderRadius: 60,
     borderWidth: 1.5,
     borderStyle: 'dashed',
-    overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
-  imageContainer: {
-    width: '100%',
-    height: '100%',
-    position: 'relative',
+  pickerHasImage: {
+    borderStyle: 'solid',
+    borderWidth: 0,
   },
   image: {
     width: '100%',
     height: '100%',
-    borderRadius: 60,
   },
   placeholder: {
     alignItems: 'center',
@@ -131,16 +138,24 @@ const styles = StyleSheet.create({
   },
   removeButton: {
     position: 'absolute',
-    top: 0,
+    bottom: 0,
     right: 0,
-    backgroundColor: '#E03535',
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    backgroundColor: 'rgba(254, 101, 101, 1)',
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
     borderColor: '#FFF',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
   },
   error: {
     fontSize: 12,

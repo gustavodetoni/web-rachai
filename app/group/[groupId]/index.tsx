@@ -94,7 +94,7 @@ export default function GroupScreen() {
               {group?.name || 'Carregando...'}
             </ThemedText>
           </View>
-          <Pressable style={styles.memberButton}>
+          <Pressable style={styles.memberButton} onPress={() => router.push(`/group/invite-group?groupId=${groupId}`)}>
             <IconSymbol name="person.2.fill" size={20} color="rgba(128, 128, 128, 0.6)" />
           </Pressable>
         </View>
