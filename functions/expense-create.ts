@@ -14,6 +14,7 @@ export type CreateExpenseRequest = {
   amount: number
   category: ExpenseCategory
   divideTo: string[]
+  invoice?: any
 }
 
 export type ExpenseResponse = {
@@ -29,7 +30,7 @@ const fetcher = new FetcherAdapter()
 
 export async function createExpense(
   groupId: string,
-  payload: CreateExpenseRequest,
+  payload: FormData,
 ): Promise<ExpenseResponse> {
   const response = await fetcher.post(`/api/expense/${groupId}`, payload)
 
