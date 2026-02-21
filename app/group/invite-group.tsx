@@ -1,18 +1,16 @@
-import { MaterialIcons } from '@expo/vector-icons';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
   Share,
   StyleSheet,
-  Text,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  View,
-  ActivityIndicator,
+  View
 } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -25,7 +23,7 @@ import { Input } from '@components/ui/input';
 
 export default function InviteGroupScreen() {
   const router = useRouter();
-  const { groupId } = useLocalSearchParams<{ groupId: string }>();
+  const { groupId, from } = useLocalSearchParams<{ groupId: string; from?: string }>();
   const [inviteCode, setInviteCode] = useState<string>('');
 
   const { data: existingInvite, isLoading: isLoadingInvite } = useQuery({
@@ -73,7 +71,11 @@ ${inviteCode}`;
   };
 
   const handleSkip = () => {
-    router.replace(`/group/${groupId}`);
+    if (from === 'create-group') {
+      router.replace(`/group/${groupId}`);
+    } else {
+      router.back();
+    }
   };
 
   const isLoading = isLoadingInvite || generateMutation.isPending;

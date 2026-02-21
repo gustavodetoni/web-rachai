@@ -55,7 +55,7 @@ export default function CreateGroupScreen() {
       await queryClient.invalidateQueries({ queryKey: ['groups'] });
       router.replace({
         pathname: '/group/invite-group',
-        params: { groupId: data.id }
+        params: { groupId: data.id, from: 'create-group' }
       });
     },
   });

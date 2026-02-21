@@ -133,7 +133,7 @@ export default function GroupIndexScreen() {
 
             <View style={styles.separator} />
 
-            <Pressable style={styles.actionButton}>
+            <Pressable style={styles.actionButton} onPress={() => router.push('/group/join-group')}>
                 <View style={styles.iconWrapper}>
                      <AntDesign name="team" size={24} color="#fff" />
                 </View>

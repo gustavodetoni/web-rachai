@@ -2,6 +2,7 @@ import { FetcherAdapter } from './adapter/fetcher'
 import { safeGetErrorMessage } from './adapter/get-error'
 
 export type MessageResponse = {
+  groupId: string
   message: string
 }
 
