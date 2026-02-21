@@ -1,8 +1,8 @@
 import { AntDesign } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { useFocusEffect, useGlobalSearchParams, useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, View, useColorScheme } from 'react-native';
+import { useCallback, useRef, useState } from 'react';
+import { Alert, Modal, Pressable, ScrollView, StyleSheet, View, useColorScheme } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Sidebar } from '@/components/sidebar';
@@ -11,11 +11,14 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { TransactionItem } from '@/components/transaction-item';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Menu, MenuItem } from '@/components/ui/menu';
 import { Colors, Fonts } from '@/constants/theme';
 import { getExpenseSummary } from '@/functions/expense-summary-get';
+import { leaveOrDeleteGroup } from '@/functions/groups-delete';
 import { getGroups } from '@/functions/groups-get';
 import { getTransactions } from '@/functions/transaction-get';
 import { getUser } from '@/functions/user-get';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function GroupScreen() {
   const router = useRouter();
@@ -26,6 +29,9 @@ export default function GroupScreen() {
   
   const [selectedTransactionId, setSelectedTransactionId] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const menuRef = useRef<View>(null);
+  const [isMenuVisible, setIsMenuVisible] = useState(false);
+  const [menuAnchor, setMenuAnchor] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
 
   const { data: groups } = useQuery({
     queryKey: ['groups'],
@@ -76,6 +82,59 @@ export default function GroupScreen() {
     }
   };
 
+  const handleMenuPress = () => {
+    menuRef.current?.measure((x, y, width, height, pageX, pageY) => {
+      setMenuAnchor({ x: pageX, y: pageY, width, height });
+      setIsMenuVisible(true);
+    });
+  };
+
+  const menuItems: MenuItem[] = [
+    {
+      label: 'Editar grupo',
+      icon: 'square.and.pencil',
+      onPress: () => {},
+      disabled: true,
+    },
+    {
+      label: 'Convidar',
+      icon: 'square.and.arrow.up', 
+      onPress: () => {
+        if (groupId) {
+          router.push(`/group/invite-group?groupId=${groupId}`);
+        }
+      },
+    },
+    {
+      label: 'Excluir grupo',
+      icon: 'rectangle.portrait.and.arrow.right',
+      destructive: true,
+      onPress: () => {
+        if (!groupId) return;
+        Alert.alert(
+          'Excluir grupo',
+          'Tem certeza que deseja excluir este grupo? Essa ação não pode ser desfeita.',
+          [
+            { text: 'Cancelar', style: 'cancel' },
+            {
+              text: 'Excluir',
+              style: 'destructive',
+              onPress: async () => {
+                try {
+                  await leaveOrDeleteGroup(groupId);
+                  await AsyncStorage.removeItem('lastSessionGroupId');
+                  router.replace('/group');
+                } catch (error) {
+                  Alert.alert('Erro', error instanceof Error ? error.message : 'Erro ao excluir grupo');
+                }
+              },
+            },
+          ]
+        );
+      },
+    },
+  ];
+
   return (
     <ThemedView style={styles.container}>
       <ScrollView 
@@ -94,9 +153,14 @@ export default function GroupScreen() {
               {group?.name || 'Carregando...'}
             </ThemedText>
           </View>
-          <Pressable style={styles.memberButton} onPress={() => router.push(`/group/invite-group?groupId=${groupId}`)}>
-            <IconSymbol name="person.2.fill" size={20} color="rgba(128, 128, 128, 0.6)" />
-          </Pressable>
+          <View ref={menuRef} collapsable={false}>
+            <Pressable 
+              style={styles.memberButton} 
+              onPress={handleMenuPress}
+            >
+              <IconSymbol name="ellipsis" size={20} color="rgba(128, 128, 128, 0.6)" />
+            </Pressable>
+          </View>
         </View>
 
         <View style={styles.summaryContainer}>
@@ -152,6 +216,13 @@ export default function GroupScreen() {
         groups={groups}
         currentGroupId={groupId}
         onSelectGroup={handleGroupSelect}
+      />
+
+      <Menu
+        visible={isMenuVisible}
+        onClose={() => setIsMenuVisible(false)}
+        items={menuItems}
+        anchor={menuAnchor}
       />
 
       <Modal

@@ -30,6 +30,12 @@ const MAPPING = {
   'receipt': 'receipt',
   'arrow.up.circle.fill': 'arrow-upward',
   'arrow.down.circle.fill': 'arrow-downward',
+  'ellipsis': 'more-vert',
+  'square.and.pencil': 'edit',
+  'person.badge.plus': 'person-add',
+  'square.and.arrow.up': 'share',
+  'rectangle.portrait.and.arrow.right': 'exit-to-app',
+  'bell': 'notifications',
 } as any;
 
 /**
