@@ -101,15 +101,6 @@ export default function PendingsScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-           <MaterialIcons name="chevron-left" size={28} color={isDark ? '#fff' : '#000'} />
-        </TouchableOpacity>
-        <ThemedText type="title" style={styles.headerTitle}>
-          Pagamentos pendentes
-        </ThemedText>
-      </View>
-
       <ScrollView
         contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 20 }]}
         showsVerticalScrollIndicator={false}
@@ -207,6 +198,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 16,
+    paddingTop: 60,
   },
   sectionTitle: {
     fontSize: 16,

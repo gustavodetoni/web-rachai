@@ -104,7 +104,9 @@ export default function CreateExpenseScreen() {
       formData.append('title', data.title);
       formData.append('amount', String(Number(data.amount.replace(',', '.'))));
       formData.append('category', data.category);
-      formData.append('divideTo', JSON.stringify(data.divideTo));
+      if (data.divideTo !== null && data.divideTo.length > 0) {
+        formData.append('divideTo', JSON.stringify(data.divideTo));
+      }
       
       if (image) {
           const fileName = image.split('/').pop() || 'invoice.jpg';
