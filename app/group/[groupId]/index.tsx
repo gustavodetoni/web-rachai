@@ -1,8 +1,10 @@
 import { AntDesign } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
+import { Image } from 'expo-image';
 import { useFocusEffect, useGlobalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
-import { Alert, Modal, Pressable, ScrollView, StyleSheet, View, useColorScheme } from 'react-native';
+import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, StyleSheet, View, useColorScheme } from 'react-native';
+import ImageViewing from 'react-native-image-viewing';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Sidebar } from '@/components/sidebar';
@@ -16,6 +18,7 @@ import { Colors, Fonts } from '@/constants/theme';
 import { getExpenseSummary } from '@/functions/expense-summary-get';
 import { leaveOrDeleteGroup } from '@/functions/groups-delete';
 import { getGroups } from '@/functions/groups-get';
+import { getTransactionDetail } from '@/functions/transaction-detail-get';
 import { getTransactions } from '@/functions/transaction-get';
 import { getUser } from '@/functions/user-get';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -26,8 +29,10 @@ export default function GroupScreen() {
   const groupId = Array.isArray(params.groupId) ? params.groupId[0] : params.groupId;
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
   
   const [selectedTransactionId, setSelectedTransactionId] = useState<string | null>(null);
+  const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const menuRef = useRef<View>(null);
   const [isMenuVisible, setIsMenuVisible] = useState(false);
@@ -55,6 +60,12 @@ export default function GroupScreen() {
     queryFn: () => getTransactions(groupId!),
     enabled: !!groupId,
     gcTime: 0,
+  });
+
+  const { data: transactionDetail, isLoading: isLoadingDetail } = useQuery({
+    queryKey: ['transaction-detail', selectedTransactionId],
+    queryFn: () => getTransactionDetail(selectedTransactionId!),
+    enabled: !!selectedTransactionId,
   });
 
   useFocusEffect(
@@ -134,6 +145,23 @@ export default function GroupScreen() {
       },
     },
   ];
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(value);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
 
   return (
     <ThemedView style={styles.container}>
@@ -228,18 +256,119 @@ export default function GroupScreen() {
       <Modal
         visible={!!selectedTransactionId}
         transparent={true}
-        animationType="fade"
+        animationType="slide"
         onRequestClose={closeModal}
       >
-        <Pressable style={styles.modalOverlay} onPress={closeModal}>
+        <View style={styles.modalOverlay}>
           <ThemedView style={styles.modalContent}>
-            <ThemedText type="subtitle">Detalhe transação</ThemedText>
-            <ThemedText style={styles.modalId}>ID: {selectedTransactionId}</ThemedText>
-            <Pressable style={styles.closeButton} onPress={closeModal}>
-              <ThemedText style={styles.closeButtonText}>Fechar</ThemedText>
-            </Pressable>
+            <View style={styles.modalHeader}>
+              <ThemedText type="subtitle">Detalhes da Transação</ThemedText>
+              <Pressable onPress={closeModal} style={styles.closeIcon}>
+                <AntDesign name="close" size={24} color={iconColor} />
+              </Pressable>
+            </View>
+
+            {isLoadingDetail ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#5DC264" />
+              </View>
+            ) : transactionDetail ? (
+              <ScrollView showsVerticalScrollIndicator={false}>
+                <View style={styles.detailHeader}>
+                  <View style={styles.detailIconContainer}>
+                    <IconSymbol 
+                      name={transactionDetail.type === 'EXPENSE' ? 'cart.fill' : 'arrow.right.arrow.left'} 
+                      size={32} 
+                      color="#fff" 
+                    />
+                  </View>
+                  <ThemedText type="title" style={styles.detailAmount}>
+                    {formatCurrency(transactionDetail.amount)}
+                  </ThemedText>
+                  <ThemedText style={styles.detailTitle}>{transactionDetail.name}</ThemedText>
+                  <ThemedText style={styles.detailDate}>{formatDate(transactionDetail.createdAt)}</ThemedText>
+                </View>
+
+                <View style={styles.detailSection}>
+                  <ThemedText type="defaultSemiBold" style={styles.detailLabel}>Categoria</ThemedText>
+                  <ThemedText>{transactionDetail.category || 'Geral'}</ThemedText>
+                </View>
+
+                <View style={styles.detailSection}>
+                  <ThemedText type="defaultSemiBold" style={styles.detailLabel}>Quem pagou</ThemedText>
+                  <ThemedText>{transactionDetail.userName}</ThemedText>
+                </View>
+
+                {transactionDetail.expenseInvoice && (
+                  <View style={styles.detailSection}>
+                    <ThemedText type="defaultSemiBold" style={styles.detailLabel}>Comprovante da Despesa</ThemedText>
+                    <Pressable onPress={() => setFullScreenImage(transactionDetail.expenseInvoice!)}>
+                      <Image 
+                        source={{ uri: transactionDetail.expenseInvoice }} 
+                        style={[
+                          styles.invoiceImage,
+                          { backgroundColor: isDark ? '#000000' : '#ffffff' }
+                        ]} 
+                        contentFit="cover"
+                        transition={1000}
+                      />
+                    </Pressable>
+                  </View>
+                )}
+
+                {transactionDetail.splits && transactionDetail.splits.length > 0 && (
+                  <View style={styles.detailSection}>
+                    <ThemedText type="defaultSemiBold" style={styles.detailLabel}>Divisão</ThemedText>
+                    {transactionDetail.splits.map((split) => (
+                      <View key={split.userId} style={styles.splitRow}>
+                        <ThemedText style={styles.splitUser}>{split.userName}</ThemedText>
+                        <View style={styles.splitInfo}>
+                          <ThemedText style={styles.splitAmount}>{formatCurrency(split.amount)}</ThemedText>
+                          {split.paid ? (
+                            <ThemedText style={styles.paidStatus}>Pago</ThemedText>
+                          ) : (
+                            <ThemedText style={styles.pendingStatus}>Pendente</ThemedText>
+                          )}
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                )}
+
+                {transactionDetail.type === 'PAYMENT' && transactionDetail.splits?.some(s => s.evidence) && (
+                   <View style={styles.detailSection}>
+                    <ThemedText type="defaultSemiBold" style={styles.detailLabel}>Comprovante de Pagamento</ThemedText>
+                     {transactionDetail.splits.filter(s => s.evidence).map((s, idx) => (
+                      <Pressable onPress={() => setFullScreenImage(s.evidence!)}>
+                       <View key={idx} style={{ marginTop: 8 }}>
+                          <Image 
+                            source={{ uri: s.evidence }} 
+                            style={[
+                              styles.invoiceImage,
+                              { backgroundColor: isDark ? '#000000' : '#ffffff' }
+                            ]} 
+                            contentFit="cover"
+                            transition={1000}
+                          />
+                       </View>
+                       </Pressable>
+                     ))}
+                   </View>
+                )}
+              </ScrollView>
+            ) : (
+              <View style={styles.errorContainer}>
+                <ThemedText>Não foi possível carregar os detalhes.</ThemedText>
+              </View>
+            )}
           </ThemedView>
-        </Pressable>
+        </View>
+      <ImageViewing
+        images={[{ uri: fullScreenImage || '' }]}
+        imageIndex={0}
+        visible={!!fullScreenImage}
+        onRequestClose={() => setFullScreenImage(null)}
+      />
       </Modal>
     </ThemedView>
   );
@@ -308,32 +437,118 @@ const styles = StyleSheet.create({
     opacity: 0.5,
     marginTop: 20,
   },
+  // Modal Styles
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
+    justifyContent: 'flex-end',
   },
   modalContent: {
+    height: '85%',
     width: '100%',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
     padding: 24,
-    borderRadius: 20,
+    paddingBottom: 40,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: -2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 16,
+    marginBottom: 24,
   },
-  modalId: {
-    opacity: 0.7,
+  closeIcon: {
+    padding: 4,
   },
-  closeButton: {
-    marginTop: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  detailHeader: {
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  detailIconContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     backgroundColor: '#5DC264',
-    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
   },
-  closeButtonText: {
-    color: '#fff',
+  detailAmount: {
+    fontSize: 32,
     fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  detailTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    marginBottom: 4,
+    opacity: 0.8,
+  },
+  detailDate: {
+    fontSize: 14,
+    opacity: 0.5,
+  },
+  detailSection: {
+    marginBottom: 24,
+    gap: 8,
+  },
+  detailLabel: {
+    fontSize: 14,
+    opacity: 0.6,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  invoiceImage: {
+    width: '100%',
+    height: 200,
+    borderRadius: 12,
+    backgroundColor: '#000000ff',
+  },
+  splitRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(150, 150, 150, 0.1)',
+  },
+  splitUser: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  splitInfo: {
+    alignItems: 'flex-end',
+  },
+  splitAmount: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  paidStatus: {
+    fontSize: 12,
+    color: '#5DC264',
+    fontWeight: '600',
+  },
+  pendingStatus: {
+    fontSize: 12,
+    color: '#FF3B30',
+    fontWeight: '600',
   },
 });

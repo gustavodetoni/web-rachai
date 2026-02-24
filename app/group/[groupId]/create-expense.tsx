@@ -36,7 +36,8 @@ const CATEGORIES: { label: string; value: ExpenseCategory; color: string }[] = [
 const createExpenseSchema = z.object({
   title: z.string().min(1, 'Informe o título da despesa.'),
   amount: z.string().min(1, 'Informe o valor.').refine((val) => {
-    const num = Number(val.replace(',', '.'));
+    const cleanValue = val.replace(/\D/g, '');
+    const num = Number(cleanValue) / 100;
     return !isNaN(num) && num > 0;
   }, 'Valor inválido.'),
   category: z.enum(['FOOD', 'FUEL', 'DRINKS', 'RENT', 'ENTERTAINMENT', 'OTHERS']),
@@ -102,7 +103,9 @@ export default function CreateExpenseScreen() {
     mutationFn: async (data: CreateExpenseFormValues) => {
       const formData = new FormData();
       formData.append('title', data.title);
-      formData.append('amount', String(Number(data.amount.replace(',', '.'))));
+      const cleanAmount = data.amount.replace(/\D/g, '');
+      const amountValue = Number(cleanAmount) / 100;
+      formData.append('amount', String(amountValue));
       formData.append('category', data.category);
       if (data.divideTo !== null && data.divideTo.length > 0) {
         formData.append('divideTo', JSON.stringify(data.divideTo));
@@ -122,7 +125,7 @@ export default function CreateExpenseScreen() {
       setImage(null);
       setStep(1);
       Alert.alert('Sucesso', 'Despesa criada com sucesso!', [
-        { text: 'OK', onPress: () => router.back() }
+        { text: 'OK', onPress: () => router.replace(`/group/${groupId}`) }
       ]);
     },
     onError: (error) => {
@@ -272,11 +275,23 @@ export default function CreateExpenseScreen() {
               name="amount"
               render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
                 <Input
-                  label="Valor (R$)"
-                  placeholder="0,00"
+                  label="Valor"
+                  placeholder="R$ 0,00"
                   keyboardType="numeric"
                   value={value}
-                  onChangeText={onChange}
+                  onChangeText={(text) => {
+                    const rawValue = text.replace(/\D/g, '');
+                    if (!rawValue) {
+                      onChange('');
+                      return;
+                    }
+                    const amount = parseInt(rawValue, 10) / 100;
+                    const formatted = amount.toLocaleString('pt-BR', {
+                      style: 'currency',
+                      currency: 'BRL',
+                    });
+                    onChange(formatted);
+                  }}
                   onBlur={onBlur}
                   error={error?.message}
                 />
@@ -497,7 +512,7 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#dfdfdf85',
     backgroundColor: 'transparent',
   },
   checkbox: {
@@ -505,7 +520,7 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 4,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#dfdfdf85',
     marginRight: 12,
   },
   memberName: {

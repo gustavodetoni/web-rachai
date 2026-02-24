@@ -6,6 +6,7 @@ export type Debt = {
   userId: string
   userName: string
   userPix: string | null
+  userThumbnail: string | null
   totalAmount: number
 }
 
