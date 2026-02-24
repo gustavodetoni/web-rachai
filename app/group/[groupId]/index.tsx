@@ -70,9 +70,11 @@ export default function GroupScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      refetchSummary();
-      refetchTransactions();
-    }, [refetchSummary, refetchTransactions])
+      if (groupId) {
+        refetchSummary();
+        refetchTransactions();
+      }
+    }, [refetchSummary, refetchTransactions, groupId])
   );
 
   const group = groups?.find((g) => g.id === groupId);

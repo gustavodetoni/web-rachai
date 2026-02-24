@@ -11,7 +11,7 @@ export type EditUserRequest = {
 
 const fetcher = new FetcherAdapter()
 
-export async function updateUser(payload: EditUserRequest): Promise<User> {
+export async function updateUser(payload: FormData): Promise<User> {
   const response = await fetcher.put('/api/user', payload)
 
   if (!response.ok) {

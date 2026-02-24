@@ -52,9 +52,11 @@ export default function PendingsScreen() {const params = useGlobalSearchParams()
 
   useFocusEffect(
     useCallback(() => {
-      refetchDebts();
-      refetchReceivables();
-    }, [refetchDebts, refetchReceivables])
+      if (groupId) {
+        refetchDebts();
+        refetchReceivables();
+      }
+    }, [refetchDebts, refetchReceivables, groupId])
   );
 
   const handleOpenModal = (debt: Debt) => {

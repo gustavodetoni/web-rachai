@@ -85,6 +85,11 @@ export function Sidebar({
     router.push('/group/create-group');
   };
 
+  const handleEditUser = () => {
+    onClose();
+    router.push('/group/edit-user');
+  };
+
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -119,25 +124,27 @@ export function Sidebar({
                 animatedStyle,
               ]}
             >
-              <View style={styles.header}>
-                <View style={styles.userInfo}>
-                  {user?.thumbnail ? (
-                    <Image
-                      source={{ uri: user.thumbnail }}
-                      style={styles.avatar}
-                    />
-                  ) : (
-                    <View style={[styles.avatar, styles.avatarPlaceholder]}>
-                      <ThemedText style={styles.avatarText}>
-                        {user?.name?.charAt(0).toUpperCase() || '?'}
-                      </ThemedText>
-                    </View>
-                  )}
-                  <ThemedText type="subtitle" numberOfLines={1}>
-                    {user?.name || 'Usuário'}
-                  </ThemedText>
+                <Pressable onPress={() => handleEditUser()}>
+                <View style={styles.header}>
+                  <View style={styles.userInfo}>
+                    {user?.thumbnail ? (
+                      <Image
+                        source={{ uri: user.thumbnail }}
+                        style={styles.avatar}
+                      />
+                    ) : (
+                      <View style={[styles.avatar, styles.avatarPlaceholder]}>
+                        <ThemedText style={styles.avatarText}>
+                          {user?.name?.charAt(0).toUpperCase() || '?'}
+                        </ThemedText>
+                      </View>
+                    )}
+                    <ThemedText type="subtitle" numberOfLines={1}>
+                      {user?.name || 'Usuário'}
+                    </ThemedText>
+                  </View>
                 </View>
-              </View>
+              </Pressable>
 
               <ThemedText style={styles.sectionTitle}>Seus grupos</ThemedText>
 
