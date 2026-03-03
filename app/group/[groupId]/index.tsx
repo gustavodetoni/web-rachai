@@ -1,10 +1,10 @@
+import ImageViewing from '@/components/ui/image-viewer';
 import { AntDesign, Feather } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { useFocusEffect, useGlobalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, StatusBar, StyleSheet, View, useColorScheme } from 'react-native';
-import ImageViewing from 'react-native-image-viewing';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Sidebar } from '@/components/sidebar';
@@ -222,25 +222,31 @@ export default function GroupScreen() {
           <View style={[styles.divider, { backgroundColor: isDark ? '#333' : '#F0F0F0' }]} />
 
           <View style={styles.summaryRow}>
-            <View style={styles.summaryColumn}>
+            <Pressable 
+              style={styles.summaryColumn}
+              onPress={() => router.push(`/group/${groupId}/pendings`)}
+            >
               <View style={[styles.summaryBadge, { backgroundColor: isDark ? '#1f2d25' : '#e6f7ed' }]}>
                 <ThemedText style={[styles.summaryBadgeText, { color: Colors.light.tint }]}>A receber</ThemedText>
               </View>
               <ThemedText style={[styles.summarySubValue, { color: Colors.light.tint }]}>
                 {formatCurrency(summary?.totalToReceive || 0)}
               </ThemedText>
-            </View>
+            </Pressable>
             
             <View style={[styles.verticalDivider, { backgroundColor: isDark ? '#333' : '#F0F0F0' }]} />
 
-            <View style={styles.summaryColumn}>
+            <Pressable 
+              style={styles.summaryColumn}
+              onPress={() => router.push(`/group/${groupId}/pendings`)}
+            >
               <View style={[styles.summaryBadge, { backgroundColor: isDark ? '#3f2222' : '#fce8e8' }]}>
                 <ThemedText style={[styles.summaryBadgeText, { color: isDark ? '#ef4444' : '#ca3214' }]}>A pagar</ThemedText>
               </View>
               <ThemedText style={[styles.summarySubValue, { color: isDark ? '#ef4444' : '#ca3214' }]}>
                 {formatCurrency(summary?.totalToPay || 0)}
               </ThemedText>
-            </View>
+            </Pressable>
           </View>
         </View>
 

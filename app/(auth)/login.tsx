@@ -167,10 +167,10 @@ export default function LoginScreen() {
                     <AntDesign name="google" size={20} color={Colors.dark.muted} />
                     <ThemedText style={styles.socialButtonText}>Continue with Google</ThemedText>
                   </Pressable>
-                  <Pressable style={[styles.socialButton, styles.disabledButton]} disabled={true}>
+                  {/* <Pressable style={[styles.socialButton, styles.disabledButton]} disabled={true}>
                     <AntDesign name="apple" size={20} color={Colors.dark.muted} />
                     <ThemedText style={styles.socialButtonText}>Continue with Apple</ThemedText>
-                  </Pressable>
+                  </Pressable> */}
                 </View>
               </Animated.View>
             </View>
@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 24,
-    paddingTop: 140,
+    paddingTop: 20,
     paddingBottom: 40,
   },
   header: {

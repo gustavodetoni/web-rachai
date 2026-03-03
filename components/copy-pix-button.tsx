@@ -1,5 +1,5 @@
 import * as Clipboard from 'expo-clipboard';
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Alert,
   StyleSheet,
@@ -15,6 +15,7 @@ type CopyPixButtonProps = {
 export function CopyPixButton({ pixKey }: CopyPixButtonProps) {
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
+  const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
     if (!pixKey) {
@@ -23,20 +24,29 @@ export function CopyPixButton({ pixKey }: CopyPixButtonProps) {
     }
     
     await Clipboard.setStringAsync(pixKey);
-    Alert.alert('Sucesso', 'Chave PIX copiada para a área de transferência!');
+    setCopied(true);
+    
+    // Alert.alert('Sucesso', 'Chave PIX copiada para a área de transferência!');
+
+    setTimeout(() => {
+      setCopied(false);
+    }, 5000);
   };
 
   return (
     <TouchableOpacity
       style={[
         styles.button,
-        { borderColor: '#76db75', backgroundColor: isDark ? '#171717' : '#ffffff' },
+        { 
+          borderColor: '#76db75', 
+          backgroundColor: isDark ? '#171717' : '#ffffff'
+        },
       ]}
       onPress={handleCopy}
-      disabled={!pixKey}
+      disabled={!pixKey || copied}
     >
       <Text style={[styles.text, { color: isDark ? '#ffffff' : '#000000' }]}>
-        Copiar PIX
+        {copied ? 'Copiado!' : 'Copiar PIX'}
       </Text>
     </TouchableOpacity>
   );

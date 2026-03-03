@@ -40,7 +40,6 @@ export function Menu({ visible, onClose, items, anchor }: MenuProps) {
         right: 20,
       };
 
-  const backgroundColor = isDark ? 'rgba(30, 30, 30, 0.8)' : 'rgba(255, 255, 255, 0.8)';
   const textColor = isDark ? '#fff' : '#000';
   const separatorColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
 
@@ -53,12 +52,11 @@ export function Menu({ visible, onClose, items, anchor }: MenuProps) {
     >
       <Pressable style={styles.overlay} onPress={onClose}>
         <BlurView
-          intensity={Platform.OS === 'ios' ? 80 : 0} // Android blur is tricky, fallback to opacity
           tint={isDark ? 'dark' : 'light'}
           style={[
             styles.menuContainer,
             menuStyle,
-            Platform.OS === 'android' && { backgroundColor: isDark ? '#1E1E1E' : '#FFFFFF', elevation: 5 },
+            Platform.OS === 'android' && { backgroundColor: isDark ? '#1E1E1E' : '#FFFFFF' },
           ]}
         >
           {items.map((item, index) => (

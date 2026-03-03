@@ -431,7 +431,7 @@ export default function CreateExpenseScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 72, 
+    // paddingTop: 72, 
   },
   stepsContainer: {
     flexDirection: 'row',

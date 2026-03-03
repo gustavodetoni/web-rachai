@@ -50,7 +50,7 @@ export default function GroupLayout() {
         style={[
           styles.tabBar,
           {
-            backgroundColor: isDark ? '#000000' : '#ffffff',
+            backgroundColor: isDark ? '#000000' : '#fcfcfc',
             paddingBottom: insets.bottom + 10,
             borderTopColor: isDark ? '#333' : 'rgba(128, 128, 128, 0.1)',
           },
@@ -66,7 +66,7 @@ export default function GroupLayout() {
             size={28}
             color={isIndex ? '#5DC264' : colors.tabIconDefault}
           />
-          {isIndex && <View style={styles.activeDot} />}
+          {/* {isIndex && <View style={styles.activeDot} />} */}
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -79,7 +79,7 @@ export default function GroupLayout() {
             size={28}
             color={isPendings ? '#5DC264' : colors.tabIconDefault}
           />
-          {isPendings && <View style={styles.activeDot} />}
+          {/* {isPendings && <View style={styles.activeDot} />} */}
         </TouchableOpacity>
       </View>
     </View>
@@ -96,10 +96,10 @@ const styles = StyleSheet.create({
   tabBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-end',
     paddingHorizontal: 60,
-    paddingTop: 16,
-    height: 100,
+    paddingTop: 14,
+    height: 60,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.6,

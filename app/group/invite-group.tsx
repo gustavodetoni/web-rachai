@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 18,
-    paddingTop: 80,
+    // paddingTop: 80,
   },
   header: {
     flexDirection: 'row',
@@ -178,6 +178,6 @@ const styles = StyleSheet.create({
   },
   footer: {
     paddingVertical: 16,
-    marginBottom: 60,
+    // marginBottom: 60,
   },
 });
