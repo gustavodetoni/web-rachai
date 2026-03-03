@@ -1,5 +1,6 @@
 import { JWT_EXPIRES_AT_NAME, JWT_NAME } from '@/constants/config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useQueryClient } from '@tanstack/react-query';
 import { jwtDecode } from 'jwt-decode';
 import React, {
   createContext,
@@ -25,6 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [expiresAt, setExpiresAt] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     const loadToken = async () => {
@@ -74,7 +76,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await AsyncStorage.removeItem(JWT_NAME);
     await AsyncStorage.removeItem(JWT_EXPIRES_AT_NAME);
     await AsyncStorage.removeItem('lastSessionGroupId');
-  }, []);
+    queryClient.clear();
+  }, [queryClient]);
 
   useEffect(() => {
     if (expiresAt) {

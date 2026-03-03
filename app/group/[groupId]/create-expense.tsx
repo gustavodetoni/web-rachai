@@ -13,6 +13,7 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
+  useColorScheme,
   View,
 } from 'react-native';
 import { z } from 'zod';
@@ -52,6 +53,8 @@ export default function CreateExpenseScreen() {
   const groupId = Array.isArray(params.groupId) ? params.groupId[0] : params.groupId;
   const [step, setStep] = useState(1);
   const [image, setImage] = useState<string | null>(null);
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
 
   const primaryColor = useThemeColor({ light: Colors.light.tint, dark: Colors.dark.tint }, 'tint');
 
@@ -354,11 +357,38 @@ export default function CreateExpenseScreen() {
           </View>
         ) : (
           <View style={styles.confirmationContainer}>
-            <View style={styles.categorySummary}>
-                <View style={[styles.categoryIcon, { backgroundColor: getCategoryColor(selectedCategory) }]} />
-                <ThemedText style={styles.categoryName}>
-                   {CATEGORIES.find(c => c.value === selectedCategory)?.label}
-                </ThemedText>
+
+            <View style={[styles.summaryContainer,
+            { 
+              backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF',
+                shadowColor: isDark ? '#000' : '#000',
+            }]
+            }>
+               <ThemedText style={styles.summaryTitle}>Resumo da Despesa</ThemedText>
+               
+               <View style={styles.summaryItem}>
+                 <ThemedText style={styles.summaryLabel}>Título</ThemedText>
+                 <ThemedText style={styles.summaryValue}>{watch('title')}</ThemedText>
+               </View>
+               <View style={styles.summaryItem}>
+                 <ThemedText style={styles.summaryLabel}>Valor</ThemedText>
+                 <ThemedText style={styles.summaryValue}>{watch('amount')}</ThemedText>
+               </View>
+               <View style={styles.summaryItem}>
+                 <ThemedText style={styles.summaryLabel}>Categoria</ThemedText>
+                 <View style={styles.summaryValueContainer}>
+                    <View style={[styles.summaryCategoryDot, { backgroundColor: getCategoryColor(watch('category')) }]} />
+                    <ThemedText style={styles.summaryValue}>
+                        {CATEGORIES.find(c => c.value === watch('category'))?.label}
+                    </ThemedText>
+                 </View>
+               </View>
+               <View style={styles.summaryItem}>
+                 <ThemedText style={styles.summaryLabel}>Divisão</ThemedText>
+                 <ThemedText style={styles.summaryValue}>
+                    {isAllSelected ? 'Todos do grupo' : `${(divideTo || []).length} pessoas selecionadas`}
+                 </ThemedText>
+               </View>
             </View>
 
             <ThemedText style={styles.sectionTitle}>Comprovante (Opcional)</ThemedText>
@@ -386,43 +416,43 @@ export default function CreateExpenseScreen() {
                 />
               </View>
             )}
-
-            <View style={styles.summaryContainer}>
-               <ThemedText style={styles.summaryTitle}>Resumo</ThemedText>
-               <ThemedText>Título: {watch('title')}</ThemedText>
-               <ThemedText>Valor: R$ {watch('amount')}</ThemedText>
-               <ThemedText>Categoria: {CATEGORIES.find(c => c.value === watch('category'))?.label}</ThemedText>
-               <ThemedText>Dividido com: {isAllSelected ? 'Todos' : `${(divideTo || []).length} pessoas`}</ThemedText>
-            </View>
           </View>
         )}
       </ScrollView>
 
       <View style={styles.footer}>
         {step === 3 ? (
-           <Button
-             title="Confirmar e Criar"
-             onPress={handleSubmit(onSubmit)}
-             loading={isSubmitting || mutation.isPending}
-             style={styles.button}
-           />
+           <View style={styles.footerButtonsRow}>
+             <Button
+                title="Voltar"
+                variant="outline"
+                onPress={() => setStep(step - 1)}
+                style={styles.footerButtonHalf}
+                disabled={isSubmitting || mutation.isPending}
+              />
+             <Button
+               title="Criar"
+               onPress={handleSubmit(onSubmit)}
+               loading={isSubmitting || mutation.isPending}
+               style={styles.footerButtonHalf}
+             />
+           </View>
         ) : step === 2 && (
-          <Button
-            title="Próximo"
-            onPress={handleNextStep}
-            style={styles.button}
-          />
-        )}
-        
-        {step > 2 && (
-          <Button
-            title="Voltar"
-            variant="outline"
-            onPress={() => setStep(step - 1)}
-            style={[styles.button, { marginTop: 12 }]}
-            disabled={isSubmitting || mutation.isPending}
-          />
-        )}
+          <View style={styles.footerButtonsRow}>
+            {/* <Button
+              title="Voltar"
+              variant="outline"
+              onPress={() => setStep(step - 1)}
+              style={styles.footerButtonHalf}
+              disabled={isSubmitting || mutation.isPending}
+            /> */}
+            <Button
+              title="Próximo"
+              onPress={handleNextStep}
+              style={styles.footerButtonHalf}
+            />
+          </View>
+        ) }
       </View>
     </ThemedView>
   );
@@ -573,12 +603,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   summaryContainer: {
-    marginTop: 20,
+    // marginTop: 20,
     padding: 16,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#eee',
-    backgroundColor: 'rgba(150, 150, 150, 0.1)',
   },
   summaryTitle: {
     fontWeight: 'bold',
@@ -591,7 +619,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 14,
     color: '#888',
-    marginBottom: 12,
+    marginTop: 12,
   },
   categorySummary: {
     flexDirection: 'row',
@@ -610,5 +638,42 @@ const styles = StyleSheet.create({
   categoryName: {
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  footerButtonsRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  footerButtonHalf: {
+    flex: 1,
+  },
+  summaryItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  summaryLabel: {
+    fontSize: 14,
+    color: '#888',
+  },
+  summaryValue: {
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'right',
+  },
+  summaryDivider: {
+    height: 1,
+    backgroundColor: '#eee',
+    marginVertical: 4,
+  },
+  summaryValueContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  summaryCategoryDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
   },
 });
