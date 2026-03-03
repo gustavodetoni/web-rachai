@@ -2,7 +2,7 @@ import { AntDesign } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { Link, useRouter, type Href } from "expo-router";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   Keyboard,
@@ -34,10 +34,12 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 export default function LoginScreen() {
   const router = useRouter();
   const { isAuthenticated, signIn } = useAuth();
+  const [loginAttempts, setLoginAttempts] = useState(0);
 
   const {
     control,
     handleSubmit,
+    watch,
     formState: { isSubmitting },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -47,11 +49,16 @@ export default function LoginScreen() {
     },
   });
 
+  const emailValue = watch("email");
+
   const mutation = useMutation({
     mutationFn: (payload: LoginPayload) => loginUser(payload),
     onSuccess: async (data) => {
       await signIn(data.accessToken);
       router.replace("/group");
+    },
+    onError: () => {
+      setLoginAttempts((prev) => prev + 1);
     },
   });
 
@@ -64,6 +71,14 @@ export default function LoginScreen() {
       router.replace("/group");
     }
   }, [isAuthenticated, router]);
+
+  const handleResetPassword = () => {
+    if (emailValue) {
+      router.push(`/(auth)/reset-password-provisor?email=${encodeURIComponent(emailValue)}` as Href);
+    } else {
+      router.push("/(auth)/reset-password-provisor" as Href);
+    }
+  };
 
   return (
     <ThemedView style={{ flex: 1 }}>
@@ -156,6 +171,16 @@ export default function LoginScreen() {
                   />
                 </View>
 
+                {loginAttempts > 0 && (
+                  <View style={[styles.linkRow, { justifyContent: 'center', marginTop: 16 }]}>
+                    <Pressable onPress={handleResetPassword}>
+                      <ThemedText style={styles.linkHighlight}>
+                        Esqueci minha senha
+                      </ThemedText>
+                    </Pressable>
+                  </View>
+                )}
+
                 <View style={styles.dividerContainer}>
                   <View style={styles.dividerLine} />
                   <ThemedText style={styles.dividerText}>or sign in with</ThemedText>
@@ -167,10 +192,6 @@ export default function LoginScreen() {
                     <AntDesign name="google" size={20} color={Colors.dark.muted} />
                     <ThemedText style={styles.socialButtonText}>Continue with Google</ThemedText>
                   </Pressable>
-                  {/* <Pressable style={[styles.socialButton, styles.disabledButton]} disabled={true}>
-                    <AntDesign name="apple" size={20} color={Colors.dark.muted} />
-                    <ThemedText style={styles.socialButtonText}>Continue with Apple</ThemedText>
-                  </Pressable> */}
                 </View>
               </Animated.View>
             </View>

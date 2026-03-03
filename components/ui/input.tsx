@@ -2,6 +2,7 @@ import { Colors, Fonts } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import React, { useRef } from 'react';
 import {
+  Platform,
   StyleSheet,
   Text,
   TextInput,
@@ -15,7 +16,7 @@ type InputProps = TextInputProps & {
   error?: string;
 };
 
-export function Input({ label, error, secureTextEntry, ...rest }: InputProps) {
+export function Input({ label, error, secureTextEntry, style, ...rest }: InputProps) {
   const inputBgColor = useThemeColor({ light: Colors.light.background, dark: Colors.dark.surface }, 'background');
   const borderColor = useThemeColor({ light: Colors.light.border, dark: Colors.dark.border }, 'border');
   const textColor = useThemeColor({ light: Colors.light.text, dark: Colors.dark.text }, 'text');
@@ -47,7 +48,12 @@ export function Input({ label, error, secureTextEntry, ...rest }: InputProps) {
       >
         <TextInput
           ref={inputRef}
-          style={[styles.input, { color: textColor }]}
+          style={[
+            styles.input, 
+            { color: textColor },
+            { outlineStyle: 'none' } as any, 
+            style
+          ]}
           placeholderTextColor={placeholderColor}
           secureTextEntry={secureTextEntry}
           {...rest}
@@ -78,6 +84,7 @@ const styles = StyleSheet.create({
   input: {
     fontSize: 16,
     fontFamily: Fonts.regular,
+    width: '100%', // Garante que o input ocupe todo o espaço disponível
   },
   error: {
     fontSize: 12,
