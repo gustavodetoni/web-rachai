@@ -1,14 +1,13 @@
-import { AntDesign } from '@expo/vector-icons';
+import { AntDesign, Feather } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { useFocusEffect, useGlobalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, StyleSheet, View, useColorScheme } from 'react-native';
+import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, StatusBar, StyleSheet, View, useColorScheme } from 'react-native';
 import ImageViewing from 'react-native-image-viewing';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Sidebar } from '@/components/sidebar';
-import { SummaryCard } from '@/components/summary-card';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { TransactionItem } from '@/components/transaction-item';
@@ -78,7 +77,8 @@ export default function GroupScreen() {
   );
 
   const group = groups?.find((g) => g.id === groupId);
-  const iconColor = colorScheme === 'dark' ? Colors.dark.text : Colors.light.text;
+  const headerIconColor = '#FFFFFF'; 
+  const iconColor = isDark ? Colors.dark.text : Colors.light.text;
 
   const handleTransactionPress = (id: string) => {
     setSelectedTransactionId(id);
@@ -166,64 +166,98 @@ export default function GroupScreen() {
   };
 
   return (
-    <ThemedView style={styles.container}>
+    <View style={[styles.container, { backgroundColor: isDark ? Colors.dark.background : Colors.light.background }]}>
+      <StatusBar barStyle="light-content" />
+      
       <ScrollView 
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingTop: insets.top + 20, paddingBottom: 100 }
+          { paddingBottom: 100 }
         ]}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.header}>
-          <View style={styles.headerLeft}>
+        <View style={[styles.headerShape, { height: 280 + insets.top }]}>
+           <View style={[styles.headerContent, { paddingTop: insets.top + 20 }]}>
             <Pressable onPress={() => setIsSidebarOpen(true)} style={styles.menuButton}>
-              <AntDesign name="menu-fold" size={24} color={iconColor} />
+              <Feather name="menu" size={28} color={headerIconColor} />
             </Pressable>
-            <ThemedText type="subtitle" style={styles.groupName}>
+            <ThemedText 
+              type="title" 
+              style={styles.headerTitle} 
+              numberOfLines={1} 
+              ellipsizeMode="tail"
+            >
               {group?.name || 'Carregando...'}
             </ThemedText>
-          </View>
-          <View ref={menuRef} collapsable={false}>
-            <Pressable 
-              style={styles.memberButton} 
-              onPress={handleMenuPress}
-            >
-              <IconSymbol name="ellipsis" size={20} color="rgba(128, 128, 128, 0.6)" />
-            </Pressable>
-          </View>
-        </View>
-
-        <View style={styles.summaryContainer}>
-          <SummaryCard 
-            title={`Total da ${group?.name || 'viagem'}`} 
-            value={summary?.totalSpent || 0} 
-            type="total" 
-          />
-          <View style={styles.row}>
-            <SummaryCard 
-              title="Receber" 
-              value={summary?.totalToReceive || 0} 
-              type="receive" 
-            />
-            <SummaryCard 
-              title="Pagar" 
-              value={summary?.totalToPay || 0} 
-              type="pay" 
-            />
+            <View ref={menuRef} collapsable={false}>
+              <Pressable 
+                style={styles.moreButton} 
+                onPress={handleMenuPress}
+              >
+                <Feather name="more-horizontal" size={28} color={headerIconColor} />
+              </Pressable>
+            </View>
           </View>
         </View>
 
+        {/* Spacer para posicionar o card corretamente (sobrepondo o verde) */}
+        <View style={{ marginTop: -100 }} />
+
+        {/* Summary Card */}
+        <View style={[
+          styles.summaryCard, 
+          { 
+            backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF',
+            shadowColor: isDark ? '#000' : '#000',
+          }
+        ]}>
+          <View style={styles.summaryHeader}>
+            <ThemedText style={styles.summaryLabel}>Total da viagem</ThemedText>
+          </View>
+          
+          <ThemedText style={[styles.summaryTotalValue, { color: Colors.light.tint }]}>
+            {formatCurrency(summary?.totalSpent || 0)}
+          </ThemedText>
+
+          <View style={[styles.divider, { backgroundColor: isDark ? '#333' : '#F0F0F0' }]} />
+
+          <View style={styles.summaryRow}>
+            <View style={styles.summaryColumn}>
+              <View style={[styles.summaryBadge, { backgroundColor: isDark ? '#1f2d25' : '#e6f7ed' }]}>
+                <ThemedText style={[styles.summaryBadgeText, { color: Colors.light.tint }]}>A receber</ThemedText>
+              </View>
+              <ThemedText style={[styles.summarySubValue, { color: Colors.light.tint }]}>
+                {formatCurrency(summary?.totalToReceive || 0)}
+              </ThemedText>
+            </View>
+            
+            <View style={[styles.verticalDivider, { backgroundColor: isDark ? '#333' : '#F0F0F0' }]} />
+
+            <View style={styles.summaryColumn}>
+              <View style={[styles.summaryBadge, { backgroundColor: isDark ? '#3f2222' : '#fce8e8' }]}>
+                <ThemedText style={[styles.summaryBadgeText, { color: isDark ? '#ef4444' : '#ca3214' }]}>A pagar</ThemedText>
+              </View>
+              <ThemedText style={[styles.summarySubValue, { color: isDark ? '#ef4444' : '#ca3214' }]}>
+                {formatCurrency(summary?.totalToPay || 0)}
+              </ThemedText>
+            </View>
+          </View>
+        </View>
+
+        {/* Transactions Section */}
         <View style={styles.transactionsSection}>
-          <ThemedText type="defaultSemiBold" style={styles.sectionTitle}>
-            Lista de transações
-          </ThemedText>
-          <ThemedText style={styles.dateHeader}>
-            {new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
-          </ThemedText>
+          <View style={styles.sectionHeader}>
+            <ThemedText type="defaultSemiBold" style={styles.sectionTitle}>
+              Transações recentes
+            </ThemedText>
+            <ThemedText style={styles.dateHeader}>
+              {new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' })}
+            </ThemedText>
+          </View>
 
           <View style={styles.transactionsList}>
             {isLoadingTransactions ? (
-              <ThemedText>Carregando transações...</ThemedText>
+              <ActivityIndicator color={Colors.light.tint} style={{ marginTop: 20 }} />
             ) : transactions?.length === 0 ? (
               <ThemedText style={styles.emptyText}>Nenhuma transação encontrada.</ThemedText>
             ) : (
@@ -254,7 +288,6 @@ export default function GroupScreen() {
         items={menuItems}
         anchor={menuAnchor}
       />
-
       <Modal
         visible={!!selectedTransactionId}
         transparent={true}
@@ -372,7 +405,7 @@ export default function GroupScreen() {
         onRequestClose={() => setFullScreenImage(null)}
       />
       </Modal>
-    </ThemedView>
+    </View>
   );
 }
 
@@ -380,66 +413,128 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  scrollContent: {
-    paddingHorizontal: 20,
+  headerShape: {
+    width: '100%',
+    backgroundColor: '#2E9E5F',
+    borderBottomLeftRadius: 40,
+    borderBottomRightRadius: 40,
   },
-  header: {
+  headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 24,
+    paddingHorizontal: 20,
   },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
+  headerTitle: {
+    color: '#ffffff',
+    fontSize: 28, // Large title
+    fontWeight: '800', // Extra bold
     flex: 1,
+    textAlign: 'center',
   },
   menuButton: {
-    padding: 4,
+    padding: 8,
+    marginLeft: -8,
   },
-  groupName: {
-    fontSize: 34, 
-    flex: 1,
+  moreButton: {
+    padding: 8,
+    marginRight: -8,
   },
-  memberButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(128, 128, 128, 0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 40,
   },
-  summaryContainer: {
-    marginBottom: 32,
+  summaryCard: {
+    marginHorizontal: 20,
+    marginTop: -80, // Overlap effect
+    borderRadius: 20,
+    padding: 24,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+    zIndex: 2,
   },
-  row: {
+  summaryHeader: {
     flexDirection: 'row',
-    gap: 12,
+    justifyContent: 'space-between',
+    marginBottom: 0,
+  },
+  summaryLabel: {
+    fontSize: 14,
+    color: '#A1ACBA',
+    fontWeight: '500',
+  },
+  summaryTotalValue: {
+    fontSize: 36,
+    fontWeight: '800',
+    paddingTop: 22,
+    marginBottom: 18,
+    fontFamily: Fonts.extraBold,
+  },
+  divider: {
+    height: 1,
+    width: '100%',
+    marginBottom: 24,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  verticalDivider: {
+    width: 1,
+    height: '80%',
+  },
+  summaryColumn: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 8,
+  },
+  summaryBadge: {
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    marginBottom: 4,
+  },
+  summaryBadgeText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  summarySubValue: {
+    fontSize: 18,
+    fontWeight: '600',
+    fontFamily: Fonts.semiBold,
   },
   transactionsSection: {
-    flex: 1,
+    paddingHorizontal: 24,
+    marginTop: 32,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
   },
   sectionTitle: {
     fontSize: 18,
-    marginBottom: 4,
   },
   dateHeader: {
-    fontSize: 12,
-    opacity: 0.5,
-    marginBottom: 16,
-    fontFamily: Fonts.semiBold,
+    fontSize: 13,
+    color: '#A1ACBA',
+    fontWeight: '600',
   },
   transactionsList: {
-    gap: 12,
+    gap: 16,
   },
   emptyText: {
     textAlign: 'center',
     opacity: 0.5,
     marginTop: 20,
   },
-  // Modal Styles
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
@@ -448,8 +543,8 @@ const styles = StyleSheet.create({
   modalContent: {
     height: '85%',
     width: '100%',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
     padding: 24,
     paddingBottom: 40,
     shadowColor: '#000',
@@ -488,7 +583,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#5DC264',
+    backgroundColor: Colors.light.tint,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
@@ -521,14 +616,14 @@ const styles = StyleSheet.create({
   invoiceImage: {
     width: '100%',
     height: 200,
-    borderRadius: 12,
+    borderRadius: 16,
     backgroundColor: '#000000ff',
   },
   splitRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(150, 150, 150, 0.1)',
   },
@@ -545,7 +640,7 @@ const styles = StyleSheet.create({
   },
   paidStatus: {
     fontSize: 12,
-    color: '#5DC264',
+    color: Colors.light.tint,
     fontWeight: '600',
   },
   pendingStatus: {
