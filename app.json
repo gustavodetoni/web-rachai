@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "web-racha",
-    "slug": "web-racha",
+    "name": "Rachaí",
+    "slug": "Rachaí",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -21,7 +21,17 @@
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/icon.png"
+      "favicon": "./assets/images/icon.png",
+      "name": "Rachaí",
+      "shortName": "Rachaí",
+      "description": "Divida suas contas de forma fácil e rápida entre amigos.",
+      "display": "standalone",
+      "backgroundColor": "#E6F4FE",
+      "themeColor": "#E6F4FE",
+      "startUrl": "/",
+      "scope": "/",
+      "orientation": "portrait",
+      "lang": "pt-BR"
     },
     "plugins": [
       "expo-router",
