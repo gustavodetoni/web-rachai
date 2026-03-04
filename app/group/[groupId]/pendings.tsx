@@ -20,12 +20,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CopyPixButton } from '@/components/copy-pix-button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { Fonts } from '@/constants/theme';
 import { getExpenseDebts, type Debt } from '@/functions/expense-debts-get';
 import {
   getExpenseReceivables
 } from '@/functions/expense-receivables-get';
 import { settleExpenseSplits } from '@/functions/expense-settle';
-import { Fonts } from '@/constants/theme';
 
 export default function PendingsScreen() {const params = useGlobalSearchParams();
   const groupId = Array.isArray(params.groupId) ? params.groupId[0] : params.groupId;
@@ -103,12 +103,23 @@ export default function PendingsScreen() {const params = useGlobalSearchParams()
         const match = /\.(\w+)$/.exec(filename);
         const type = match ? `image/${match[1]}` : 'image/jpeg';
         
-        // @ts-ignore: FormData expects Blob but React Native expects object with uri, name, type
-        formData.append('evidence', {
-          uri: Platform.OS === 'ios' ? proofUri.replace('file://', '') : proofUri,
-          name: filename,
-          type,
-        });
+        if (Platform.OS === 'web') {
+           try {
+             const res = await fetch(proofUri);
+             const blob = await res.blob();
+             const file = new File([blob], filename, { type });
+             formData.append('evidence', file);
+           } catch (err) {
+             console.error("Erro ao converter imagem web pendings:", err);
+           }
+        } else {
+          // @ts-ignore: FormData expects Blob but React Native expects object with uri, name, type
+          formData.append('evidence', {
+            uri: Platform.OS === 'ios' ? proofUri.replace('file://', '') : proofUri,
+            name: filename,
+            type,
+          });
+        }
       }
 
       await settleExpenseSplits(formData);

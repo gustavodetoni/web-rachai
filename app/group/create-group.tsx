@@ -74,11 +74,31 @@ export default function CreateGroupScreen() {
       const match = /\.(\w+)$/.exec(fileName);
       const type = match ? `image/${match[1]}` : 'image/jpeg';
 
-      formData.append('thumbnail', {
-        uri,
-        name: fileName,
-        type,
-      } as any);
+      if (Platform.OS === 'web') {
+        fetch(uri)
+          .then(res => res.blob())
+          .then(blob => {
+            const file = new File([blob], fileName, { type });
+            formData.append('thumbnail', file);
+            mutation.mutate(formData);
+          })
+          .catch(err => {
+            console.error("Erro ao converter imagem web:", err);
+             formData.append('thumbnail', {
+                uri,
+                name: fileName,
+                type,
+              } as any);
+             mutation.mutate(formData);
+          });
+          return;
+      } else {
+        formData.append('thumbnail', {
+          uri,
+          name: fileName,
+          type,
+        } as any);
+      }
     }
 
     mutation.mutate(formData);

@@ -124,11 +124,31 @@ export default function EditUserScreen() {
         const match = /\.(\w+)$/.exec(fileName);
         const type = match ? `image/${match[1]}` : 'image/jpeg';
 
-        formData.append('thumbnail', {
-          uri,
-          name: fileName,
-          type,
-        } as any);
+        if (Platform.OS === 'web') {
+           fetch(uri)
+            .then(res => res.blob())
+            .then(blob => {
+              const file = new File([blob], fileName, { type });
+              formData.append('thumbnail', file);
+              updateMutation.mutate(formData);
+            })
+            .catch(err => {
+              console.error("Erro ao converter imagem user web:", err);
+               formData.append('thumbnail', {
+                  uri,
+                  name: fileName,
+                  type,
+                } as any);
+               updateMutation.mutate(formData);
+            });
+            return;
+        } else {
+           formData.append('thumbnail', {
+             uri,
+             name: fileName,
+             type,
+           } as any);
+        }
       }
     }
 

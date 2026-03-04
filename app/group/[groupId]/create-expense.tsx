@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  Platform,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
@@ -118,7 +119,19 @@ export default function CreateExpenseScreen() {
           const fileName = image.split('/').pop() || 'invoice.jpg';
           const match = /\.(\w+)$/.exec(fileName);
           const type = match ? `image/${match[1]}` : 'image/jpeg';
-          formData.append('invoice', { uri: image, name: fileName, type } as any);
+          
+          if (Platform.OS === 'web') {
+             try {
+               const res = await fetch(image);
+               const blob = await res.blob();
+               const file = new File([blob], fileName, { type });
+               formData.append('invoice', file);
+             } catch (err) {
+               console.error("Erro ao processar imagem web", err);
+             }
+          } else {
+            formData.append('invoice', { uri: image, name: fileName, type } as any);
+          }
       }
       
       return createExpense(groupId!, formData);
